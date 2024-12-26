@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+XDEBUG_CONFIG_FILE=${PHP_INI_DIR}/disabled/xdebug.ini
+
+if [ -f "$XDEBUG_CONFIG_FILE" ]; then
+    echo "Enabling Xdebug"
+    mv ${XDEBUG_CONFIG_FILE} ${PHP_INI_DIR}/conf.d/
+fi

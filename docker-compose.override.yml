@@ -1,0 +1,9 @@
+services:
+  web:
+    environment:
+      - ENABLE_PHP_DEV_CONFIG=1
+#      - ENABLE_XDEBUG=1
+    ports:
+      - "9000:80"
+    volumes:
+      - ./app/:/var/www:delegated
