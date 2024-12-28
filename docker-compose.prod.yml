@@ -1,7 +1,7 @@
 services:
 
   web:
-    image: ${APP_IMAGE}:${GITHUB_SHA}
+    image: ${APP_IMAGE}:${GIT_SHORT_SHA}
     deploy:
       rollback_config:
         order: start-first
