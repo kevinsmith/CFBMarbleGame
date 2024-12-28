@@ -88,7 +88,8 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          # Use permanent PAT instead of GITHUB_TOKEN
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Deploy to production
         env:
