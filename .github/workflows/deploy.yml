@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  APP_IMAGE: ${{ github.repository }}/app
+  APP_IMAGE: ${{ github.repository_owner }}/cfbmarblegame/app
 
 permissions:
   contents: read
