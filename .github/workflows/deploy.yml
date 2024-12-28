@@ -40,7 +40,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.APP_IMAGE }}
           tags: |
             type=sha,prefix=
-            type=ref,event=branch
+            type=ref,event=branch,enable=${{ github.ref != 'refs/heads/prod' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/prod' }}
 
       - name: Login to GitHub Container Registry
