@@ -1,0 +1,21 @@
+services:
+
+  web:
+    image: ${APP_IMAGE}:${GITHUB_SHA}
+    deploy:
+      rollback_config:
+        order: start-first
+      update_config:
+        order: start-first
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.cfbmarblegame.entrypoints=websecure
+        - traefik.http.routers.cfbmarblegame.rule=Host(`cfbmarblegame.com`)
+        - traefik.http.services.cfbmarblegame.loadbalancer.server.port=80
+    networks:
+      - traefik
+      - default
+
+networks:
+  traefik:
+    external: true
