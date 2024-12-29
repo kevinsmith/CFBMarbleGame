@@ -1,5 +1,8 @@
 services:
   web:
+    build:
+      args:
+        - DEV_DEPS=1
     environment:
       - ENABLE_PHP_DEV_CONFIG=1
 #      - ENABLE_XDEBUG=1

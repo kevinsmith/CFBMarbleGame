@@ -1,0 +1,11 @@
+{
+    "name": "kevinsmith/cfbmarblegame",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

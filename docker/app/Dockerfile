@@ -1,5 +1,6 @@
 FROM php:8.4.2-fpm-bookworm
 LABEL maintainer="Kevin Smith <kevin@kevinsmith.io>"
+ARG DEV_DEPS
 
 #
 # This image is meant to be built with the build context of the
@@ -116,6 +117,19 @@ RUN cp /etc/nginx/imported/nginx.conf /etc/nginx/nginx.conf \
     && cp /etc/nginx/imported/default.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /var/www
+
+# Install Composer
+COPY --from=composer:2.8.4 /usr/bin/composer /usr/bin/composer
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
+COPY app/composer.json app/composer.lock ./
+
+RUN if [ -z $DEV_DEPS ] || [ $DEV_DEPS = "0" ]; then \
+      composer install --no-dev --optimize-autoloader --no-interaction --no-ansi --no-scripts; \
+    else \
+      composer install --no-interaction --no-ansi --no-scripts; \
+    fi \
+    && composer clear-cache
 
 COPY app/. .
 
