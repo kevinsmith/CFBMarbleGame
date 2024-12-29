@@ -26,3 +26,15 @@ services:
         phpcs
     volumes:
       - ./app/:/var/www:delegated
+
+  phpstan:
+    image: ghcr.io/phpstan/phpstan:2.0.4-php8.4
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - |
+        mkdir -p /app/tools/phpstan/
+        rm -rf /app/tools/phpstan/*
+        cp -a /composer/vendor/phpstan/phpstan/phpstan.phar /app/tools/phpstan/
+        phpstan
+    volumes:
+      - ./app/:/app

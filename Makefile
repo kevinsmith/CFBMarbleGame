@@ -10,4 +10,7 @@ phpcbf:
 phpcs:
 	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpcs
 
-quality: hadolint phpcbf phpcs
+phpstan:
+	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpstan
+
+quality: hadolint phpcbf phpcs phpstan
