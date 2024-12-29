@@ -1,4 +1,4 @@
-FROM php:8.4.2-fpm-bookworm
+FROM php:8.4.2-fpm-bookworm AS prod
 LABEL maintainer="Kevin Smith <kevin@kevinsmith.io>"
 ARG DEV_DEPS
 
@@ -140,3 +140,14 @@ COPY docker/app/services.d /etc/services.d/
 RUN chmod -R +x /etc/services.d/
 
 ENTRYPOINT ["/init"]
+
+FROM prod AS php_codesniffer
+
+ENV PATH="/root/.composer/vendor/bin:${PATH}"
+
+# Coding standards must be installed with relative paths to work from inside the container and for IDEs
+RUN composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false \
+    && composer global require doctrine/coding-standard:^12.0 \
+    && phpcs --config-set installed_paths ../../doctrine/coding-standard/lib,../../slevomat/coding-standard
+
+ENTRYPOINT ["phpcs"]

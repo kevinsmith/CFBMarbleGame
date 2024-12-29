@@ -1,2 +1,5 @@
 .idea
+app/.phpcs-cache
+app/phpcs.xml
+app/tools
 app/vendor

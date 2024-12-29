@@ -2,3 +2,4 @@ services:
   web:
     build:
       dockerfile: docker/app/Dockerfile
+      target: prod

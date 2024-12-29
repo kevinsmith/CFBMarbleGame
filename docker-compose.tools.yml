@@ -1,0 +1,28 @@
+services:
+  phpcbf:
+    build:
+      dockerfile: docker/app/Dockerfile
+      target: php_codesniffer
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - |
+        mkdir -p /var/www/tools/phpcs/
+        rm -rf /var/www/tools/phpcs/*
+        cp -a ~/.composer/. /var/www/tools/phpcs/
+        phpcbf
+    volumes:
+      - ./app/:/var/www:delegated
+
+  phpcs:
+    build:
+      dockerfile: docker/app/Dockerfile
+      target: php_codesniffer
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - |
+        mkdir -p /var/www/tools/phpcs/
+        rm -rf /var/www/tools/phpcs/*
+        cp -a ~/.composer/. /var/www/tools/phpcs/
+        phpcs
+    volumes:
+      - ./app/:/var/www:delegated
