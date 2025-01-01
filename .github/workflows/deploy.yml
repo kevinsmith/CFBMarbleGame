@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   hadolint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +24,7 @@ jobs:
         run: make hadolint
 
   phpcs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -47,7 +47,7 @@ jobs:
         run: make phpcs
 
   phpstan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +55,7 @@ jobs:
         run: make phpstan
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [hadolint, phpcs, phpstan]
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     if: github.ref == 'refs/heads/prod'
     environment:
