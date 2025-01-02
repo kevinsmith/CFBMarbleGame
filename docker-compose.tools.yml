@@ -38,3 +38,17 @@ services:
         phpstan
     volumes:
       - ./app/:/app
+
+  phpunit:
+    build:
+      dockerfile: docker/app/Dockerfile
+      target: phpunit
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - |
+        mkdir -p /var/www/tools/phpunit/
+        rm -rf /var/www/tools/phpunit/*
+        cp -a ~/.composer/. /var/www/tools/phpunit/
+        phpunit
+    volumes:
+      - ./app/:/var/www:delegated

@@ -1,5 +1,7 @@
 .idea
 app/.phpcs-cache
 app/phpcs.xml
+app/phpunit.xml
+app/.phpunit.cache
 app/tools
 app/vendor

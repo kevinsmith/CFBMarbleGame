@@ -54,9 +54,55 @@ jobs:
       - name: Run PHPStan
         run: make phpstan
 
+  phpunit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get composer cache directory
+        id: composer-cache
+        working-directory: ./app
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        working-directory: ./app
+        run: composer install --no-interaction --no-ansi --no-scripts
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build PHPUnit image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/app/Dockerfile
+          target: phpunit
+          load: true
+          cache-from: |
+            type=gha,scope=${{ github.ref_name }}-phpunit
+            type=gha
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-phpunit
+
+      - name: Run PHPUnit
+        run: make phpunit
+
   build:
     runs-on: ubuntu-24.04
-    needs: [hadolint, phpcs, phpstan]
+    needs: [hadolint, phpcs, phpstan, phpunit]
     steps:
       - uses: actions/checkout@v4
 

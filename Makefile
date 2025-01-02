@@ -14,3 +14,6 @@ phpstan:
 	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpstan
 
 quality: hadolint phpcbf phpcs phpstan
+
+phpunit:
+	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpunit

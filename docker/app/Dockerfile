@@ -151,3 +151,11 @@ RUN composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffe
     && phpcs --config-set installed_paths ../../doctrine/coding-standard/lib,../../slevomat/coding-standard
 
 ENTRYPOINT ["phpcs"]
+
+FROM prod AS phpunit
+
+ENV PATH="/root/.composer/vendor/bin:${PATH}"
+
+RUN composer global require phpunit/phpunit:^11.5
+
+ENTRYPOINT ["phpunit"]
