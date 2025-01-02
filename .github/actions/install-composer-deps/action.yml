@@ -1,0 +1,42 @@
+name: Install Composer Dependencies
+description: 'Sets up PHP, installs Composer dependencies, and caches them'
+inputs:
+  php-version:
+    description: 'PHP version to set up'
+    required: true
+    default: '8.4'
+  github-token:
+    description: 'GitHub token to sidestep throttling'
+    required: true
+  working-directory:
+    description: 'Working directory of composer.json'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+
+    - name: Get composer cache directory
+      id: composer-cache
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+
+    - name: Install Composer dependencies
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: composer install --no-interaction --no-ansi --no-scripts

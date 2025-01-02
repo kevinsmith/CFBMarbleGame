@@ -51,6 +51,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: ./.github/actions/install-composer-deps
+        with:
+          php-version: 8.4
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: ./app
+
       - name: Run PHPStan
         run: make phpstan
 
@@ -59,28 +65,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+      - uses: ./.github/actions/install-composer-deps
         with:
           php-version: 8.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get composer cache directory
-        id: composer-cache
-        working-directory: ./app
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        working-directory: ./app
-        run: composer install --no-interaction --no-ansi --no-scripts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: ./app
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
