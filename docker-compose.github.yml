@@ -1,0 +1,4 @@
+services:
+  web:
+    ports:
+      - "9000:80"

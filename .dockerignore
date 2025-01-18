@@ -5,3 +5,4 @@ app/phpunit.xml
 app/.phpunit.cache
 app/tools
 app/vendor
+playwright

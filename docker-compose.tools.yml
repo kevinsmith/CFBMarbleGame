@@ -52,3 +52,21 @@ services:
         phpunit
     volumes:
       - ./app/:/var/www:delegated
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.49.1-noble
+    init: true
+    command: /bin/bash
+    working_dir: /playwright
+    env_file: ./playwright/.env
+    environment:
+      - PLAYWRIGHT_HTML_OPEN=never
+      - PLAYWRIGHT_HTML_HOST=0.0.0.0
+      - PW_BASE_URL=http://host.docker.internal:9000
+    ports:
+      - "9323:9323"
+    ipc: host
+    extra_hosts:
+      - "localhost:host-gateway"
+    volumes:
+      - ./playwright/:/playwright:delegated
