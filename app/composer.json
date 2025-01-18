@@ -3,9 +3,16 @@
     "type": "project",
     "license": "proprietary",
     "require": {
-        "php": "^8.4"
+        "php": "^8.4",
+        "php-di/php-di": "^7.0",
+        "psr/container": "^2.0"
     },
     "config": {
         "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
     }
 }

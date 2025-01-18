@@ -2,4 +2,14 @@
 
 declare(strict_types=1);
 
-include __DIR__ . '/../src/temp_welcome.php';
+use App\Container;
+use App\HttpServer\TempWelcome;
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+$container = Container::init();
+
+$tempWelcome = $container->get(TempWelcome::class);
+assert($tempWelcome instanceof TempWelcome);
+
+$tempWelcome();

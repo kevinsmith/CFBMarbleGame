@@ -1,6 +1,14 @@
 <?php
-// phpcs:ignoreFile
-?>
+
+declare(strict_types=1);
+
+namespace App\HttpServer;
+
+final readonly class TempWelcome
+{
+    public function __invoke(): void
+    {
+        exit(<<<'HTML'
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
@@ -12,3 +20,6 @@
 <p><a href="https://x.com/CFBMarbleGame">More</a></p>
 </body>
 </html>
+HTML);
+    }
+}
