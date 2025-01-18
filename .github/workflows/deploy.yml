@@ -237,7 +237,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: benjlevesque/short-sha@v3.0
+      - uses: benjlevesque/short-sha@599815c8ee942a9616c92bcfb4f947a3b670ab0b # v3.0
         with:
           variable_name: GIT_SHORT_SHA
 
