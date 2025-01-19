@@ -4,6 +4,8 @@
     "license": "proprietary",
     "require": {
         "php": "^8.4",
+        "filp/whoops": "^2.16",
+        "monolog/monolog": "^3.8",
         "php-di/php-di": "^7.0",
         "psr/container": "^2.0"
     },

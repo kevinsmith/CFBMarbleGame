@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Container;
+use App\Bootstrap;
 use App\HttpServer\TempWelcome;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-$container = Container::init();
+$container = Bootstrap::init();
 
 $tempWelcome = $container->get(TempWelcome::class);
 assert($tempWelcome instanceof TempWelcome);

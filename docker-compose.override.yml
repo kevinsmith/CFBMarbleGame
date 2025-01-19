@@ -3,9 +3,10 @@ services:
     build:
       args:
         - DEV_DEPS=1
+    env_file: app/.env
     environment:
       - ENABLE_PHP_DEV_CONFIG=1
-#      - ENABLE_XDEBUG=1
+      - ENABLE_XDEBUG=1
     ports:
       - "9000:80"
     volumes:

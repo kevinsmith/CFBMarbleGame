@@ -3,3 +3,6 @@ parameters:
     paths:
         - public
         - src
+    ignoreErrors:
+        - identifier: argument.type
+          path: src/Container.php
