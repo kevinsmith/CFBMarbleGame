@@ -6,8 +6,10 @@
         "php": "^8.4",
         "filp/whoops": "^2.16",
         "monolog/monolog": "^3.8",
+        "nikic/fast-route": "^1.3",
         "php-di/php-di": "^7.0",
-        "psr/container": "^2.0"
+        "psr/container": "^2.0",
+        "sapien/sapien": "^1.1"
     },
     "config": {
         "sort-packages": true

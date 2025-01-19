@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Bootstrap;
-use App\HttpServer\TempWelcome;
+use App\HttpServer\FrontController;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 $container = Bootstrap::init();
 
-$tempWelcome = $container->get(TempWelcome::class);
-assert($tempWelcome instanceof TempWelcome);
+$frontController = $container->get(FrontController::class);
+assert($frontController instanceof FrontController);
 
-$tempWelcome();
+$frontController->run();
