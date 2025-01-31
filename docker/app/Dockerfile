@@ -1,4 +1,4 @@
-FROM php:8.4.2-fpm-bookworm AS prod
+FROM php:8.4.3-fpm-bookworm AS prod
 LABEL maintainer="Kevin Smith <kevin@kevinsmith.io>"
 ARG DEV_DEPS
 
