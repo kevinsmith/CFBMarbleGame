@@ -81,9 +81,13 @@ ARG NJS_VERSION=0.8.8
 ARG NJS_RELEASE=1~bookworm
 ARG PKG_RELEASE=1~bookworm
 
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62 \
-    && echo "deb http://nginx.org/packages/mainline/debian/ bookworm nginx" >> /etc/apt/sources.list \
-    && apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
+        ca-certificates \
+        curl \
+        gnupg \
+        && curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /usr/share/keyrings/nginx-keyring.gpg \
+        && echo "deb [signed-by=/usr/share/keyrings/nginx-keyring.gpg] http://nginx.org/packages/mainline/debian/ bookworm nginx" > /etc/apt/sources.list.d/nginx.list \
+        && apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
         ca-certificates \
         nginx=${NGINX_VERSION}-${PKG_RELEASE} \
         nginx-module-xslt=${NGINX_VERSION}-${PKG_RELEASE} \
