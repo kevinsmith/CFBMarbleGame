@@ -4,6 +4,7 @@ on:
   push:
     branches: [ 'prod' ]
   pull_request:
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -173,7 +174,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     needs: [playwright, hadolint, phpcs, phpstan, phpunit]
-    if: github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/prod' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
 
@@ -216,7 +217,7 @@ jobs:
   deploy:
     runs-on: ubuntu-24.04
     needs: build
-    if: github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/prod' || github.event_name == 'workflow_dispatch'
     environment:
       name: production
       url: https://cfbmarblegame.com
