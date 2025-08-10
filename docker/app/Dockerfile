@@ -76,8 +76,8 @@ ENV XDEBUG_CLIENT_HOST=host.docker.internal
 
 # Find at http://nginx.org/packages/mainline/debian/pool/nginx/n/nginx/
 # and http://nginx.org/packages/mainline/debian/pool/nginx/n/nginx-module-njs/
-ARG NGINX_VERSION=1.27.3
-ARG NJS_VERSION=0.8.8
+ARG NGINX_VERSION=1.29.0
+ARG NJS_VERSION=0.9.1
 ARG NJS_RELEASE=1~bookworm
 ARG PKG_RELEASE=1~bookworm
 
