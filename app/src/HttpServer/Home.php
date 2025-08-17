@@ -37,7 +37,7 @@ final readonly class Home
 <h1>CFB Marble Game</h1>
 <p>{$description}</p>
 
-<p><small>&copy; {$currentYear} Kevin Smith. Licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a> and provided "AS IS" without warranty of any kind.</small></p>
+<p><small>&copy; {$currentYear} Kevin Smith. All credit for the marble game concept goes to <a href="https://x.com/iowahawkblog/status/1706341845326876998">David Burge</a>. This app is <a href="https://github.com/kevinsmith/CFBMarbleGame">open source</a>, licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>, and provided "AS IS" without warranty of any kind.</small></p>
 <p><small>Find out more on <a href="https://github.com/kevinsmith/CFBMarbleGame">GitHub</a> and <a href="https://x.com/CFBMarbleGame">X</a>.</small></p>
 </body>
 </html>
