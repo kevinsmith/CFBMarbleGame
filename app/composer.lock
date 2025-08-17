@@ -524,27 +524,28 @@
         },
         {
             "name": "sapien/sapien",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sapienphp/sapien.git",
-                "reference": "1bcfc301864523dadf43d46f085d231218e7d8cb"
+                "reference": "7477096140918978a035025e2fc5d20553b16e83"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sapienphp/sapien/zipball/1bcfc301864523dadf43d46f085d231218e7d8cb",
-                "reference": "1bcfc301864523dadf43d46f085d231218e7d8cb",
+                "url": "https://api.github.com/repos/sapienphp/sapien/zipball/7477096140918978a035025e2fc5d20553b16e83",
+                "reference": "7477096140918978a035025e2fc5d20553b16e83",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.1"
+                "php": "^8.1 | ^8.2 | ^8.3 | ^8.4"
             },
             "require-dev": {
                 "ext-xdebug": "*",
                 "pds/composer-script-names": "^1.0",
                 "pds/skeleton": "^1.0",
                 "phpstan/phpstan": "^1.0",
-                "phpunit/phpunit": "^10.0"
+                "phpunit/phpunit": "^10.0",
+                "pmjones/php-styler": "0.x-dev"
             },
             "type": "library",
             "autoload": {
@@ -571,9 +572,9 @@
             "description": "Server API (SAPI) request and response objects for PHP.",
             "support": {
                 "issues": "https://github.com/sapienphp/sapien/issues",
-                "source": "https://github.com/sapienphp/sapien/tree/1.1.1"
+                "source": "https://github.com/sapienphp/sapien/tree/1.1.2"
             },
-            "time": "2023-07-01T14:43:15+00:00"
+            "time": "2025-02-03T19:53:39+00:00"
         }
     ],
     "packages-dev": [],
