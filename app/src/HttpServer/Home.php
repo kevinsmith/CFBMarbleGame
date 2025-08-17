@@ -16,6 +16,8 @@ final readonly class Home
 <head>
     <title>CFB Marble Game</title>
     <meta name="description" content="{$description}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
 <h1>CFB Marble Game</h1>
