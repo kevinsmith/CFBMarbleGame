@@ -18,6 +18,17 @@ final readonly class Home
     <meta name="description" content="{$description}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <style>
+        :root {
+          font-family: Inter, 'Helvetica Neue', Arial, sans-serif;
+          font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+        }
+        @supports (font-variation-settings: normal) {
+          :root { font-family: InterVariable, 'Helvetica Neue', Arial, sans-serif; }
+        }
+    </style>
 </head>
 <body>
 <h1>CFB Marble Game</h1>
