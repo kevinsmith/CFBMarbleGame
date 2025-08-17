@@ -14,7 +14,7 @@ final readonly class Routes
 {
     public function __invoke(RouteCollector $r): void
     {
-        $r->get('/', TempWelcome::class);
+        $r->get('/', Home::class);
 
         $r->addGroup('/QZfvbotRlJ/test-routes', static function (RouteCollector $r): void {
             $r->get('/plain', GetPlain::class);
