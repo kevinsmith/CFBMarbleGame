@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+footer a {
+    @apply text-blue-600 hover:text-blue-800 underline;
+}

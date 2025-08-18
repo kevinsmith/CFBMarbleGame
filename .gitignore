@@ -7,3 +7,5 @@ app/tools
 app/vendor
 app/.env
 docs/Bruno
+app/node_modules/
+app/public/styles.*.css

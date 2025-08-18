@@ -1,3 +1,12 @@
+FROM node:22-alpine AS tailwind
+
+WORKDIR /build
+COPY app/package*.json ./
+RUN npm install
+COPY app/. .
+ENV NODE_ENV production
+RUN npm run build
+
 FROM php:8.4.3-fpm-bookworm AS prod
 LABEL maintainer="Kevin Smith <kevin@kevinsmith.io>"
 ARG DEV_DEPS
@@ -142,6 +151,9 @@ RUN chmod -R +x /etc/cont-init.d/
 
 COPY docker/app/services.d /etc/services.d/
 RUN chmod -R +x /etc/services.d/
+
+COPY --from=tailwind /build/dist/asset-manifest.json ./dist/
+COPY --from=tailwind /build/public/styles.*.css ./public/
 
 ENTRYPOINT ["/init"]
 

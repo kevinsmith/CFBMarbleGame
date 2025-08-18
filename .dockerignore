@@ -6,3 +6,6 @@ app/.phpunit.cache
 app/tools
 app/vendor
 playwright
+app/node_modules
+app/dist/asset-manifest.json
+app/public/styles.*.css

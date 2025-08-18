@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "build": "postcss src/HttpServer/styles.css -o public/styles.css",
+    "dev": "postcss src/HttpServer/styles.css -o public/styles.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
+    "cssnano": "^7.1.0",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "postcss-hash": "^3.0.0",
+    "tailwindcss": "^4.1.12"
+  }
+}
