@@ -4,7 +4,7 @@ build_tools:
 	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml build
 
 hadolint:
-	docker run --rm -i -v $(shell pwd)/.hadolint.yaml:/.config/hadolint.yaml hadolint/hadolint < $(shell pwd)/docker/app/Dockerfile
+	docker run --rm -i -v $(shell pwd)/.hadolint.yaml:/.hadolint.yaml hadolint/hadolint < $(shell pwd)/docker/app/Dockerfile
 
 phpcbf:
 	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpcbf
