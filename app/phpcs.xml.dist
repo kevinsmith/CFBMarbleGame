@@ -14,7 +14,9 @@
     <file>src</file>
 
     <!-- Include full Doctrine Coding Standard -->
-    <rule ref="Doctrine"/>
+    <rule ref="Doctrine">
+        <exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+    </rule>
 
     <rule ref="SlevomatCodingStandard.ControlStructures.EarlyExit">
         <properties>

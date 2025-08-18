@@ -10,6 +10,7 @@ final readonly class Home
 {
     public function __invoke(): void
     {
+        $title = 'College Football Marble Game';
         $description = 'Simple Rules for a Complex Season';
         $currentYear = date('Y');
 
@@ -17,7 +18,7 @@ final readonly class Home
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <title>CFB Marble Game</title>
+    <title>{$title}</title>
     <meta name="description" content="{$description}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -34,7 +35,7 @@ final readonly class Home
     </style>
 </head>
 <body>
-<h1>CFB Marble Game</h1>
+<h1>{$title}</h1>
 <p>{$description}</p>
 
 <p><small>&copy; {$currentYear} Kevin Smith. All credit for the marble game concept goes to <a href="https://x.com/iowahawkblog/status/1706341845326876998">David Burge</a>. This app is <a href="https://github.com/kevinsmith/CFBMarbleGame">open source</a>, licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>, and provided "AS IS" without warranty of any kind.</small></p>
