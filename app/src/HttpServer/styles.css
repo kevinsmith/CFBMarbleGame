@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+:root {
+    font-family: Inter, 'Helvetica Neue', Arial, sans-serif;
+    font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+}
+
+@supports (font-variation-settings: normal) {
+    :root { font-family: InterVariable, 'Helvetica Neue', Arial, sans-serif; }
+}
+
 footer a {
     @apply text-blue-600 hover:text-blue-800 underline;
 }

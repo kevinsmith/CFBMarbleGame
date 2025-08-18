@@ -34,15 +34,6 @@ final readonly class Home
     <link rel="stylesheet" href="/{$stylesheet}">
     <link rel="preconnect" href="https://rsms.me/">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-    <style>
-        :root {
-          font-family: Inter, 'Helvetica Neue', Arial, sans-serif;
-          font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
-        }
-        @supports (font-variation-settings: normal) {
-          :root { font-family: InterVariable, 'Helvetica Neue', Arial, sans-serif; }
-        }
-    </style>
 </head>
 <body>
 <div class="mx-auto min-w-xs max-w-7xl px-4 sm:px-6 lg:px-8">
