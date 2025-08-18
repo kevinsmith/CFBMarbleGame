@@ -7,7 +7,17 @@ services:
     environment:
       - ENABLE_PHP_DEV_CONFIG=1
       - ENABLE_XDEBUG=1
-    ports:
-      - "9000:80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.cfbmarblegame.tls=true
+      - traefik.http.routers.cfbmarblegame.entrypoints=websecure
+      - traefik.http.routers.cfbmarblegame.rule=Host(`cfbmarblegame.test`)
+    networks:
+      - traefik
+      - default
     volumes:
       - ./app/:/var/www:delegated
+
+networks:
+  traefik:
+    external: true

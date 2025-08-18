@@ -17,3 +17,13 @@ Brief primer on the Marble Game algorithm:
 4. If you beat an FCS opponent, you get nothing, If you lose to an FCS opponent, they get 25% of your marbles. Because FU coward.
 
 That's it, that's the whole algorithm.
+
+## Local Dev Setup
+
+To run this locally...
+
+1. Add `cfbmarblegame.test` to your [hosts file](https://linuxize.com/post/how-to-edit-your-hosts-file/)
+2. Generate locally-trusted development certs with [mkcert](https://github.com/FiloSottile/mkcert)
+3. Create a separate Docker Compose project that runs [Traefik](https://traefik.io/traefik) on an [external network](https://docs.docker.com/reference/cli/docker/network/create/) named `traefik`
+
+Once all that's in place, run `docker compose up` to start up the local dev server, then load https://cfbmarblegame.test in your browser.
