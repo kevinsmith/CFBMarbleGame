@@ -4,7 +4,7 @@ test('landing page', async ({ page }) => {
   await page.goto('/');
 
   await expect(page).toHaveTitle('College Football Marble Game');
-  await expect(page.getByRole('heading', { name: 'College Football Marble Game' })).toBeVisible();
+  await expect(page.getByAltText('College Football Marble Game')).toBeVisible();
 });
 
 test('returns 404 not found', async ({ request }) => {

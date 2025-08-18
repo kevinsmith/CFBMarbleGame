@@ -48,7 +48,11 @@ final readonly class Home
 <div class="mx-auto min-w-xs max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-3xl">
         <main class="py-10">
-            <h1 class="text-center text-balance text-3xl font-bold">{$title}</h1>
+            <div class="flex justify-center mb-10">
+                <a href="/" class="inline-block">
+                    <img src="/logo.png" alt="{$title}" class="max-w-48 h-auto">
+                </a>
+            </div>
         </main>
         <footer>
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
