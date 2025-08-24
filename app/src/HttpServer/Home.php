@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\HttpServer;
 
+use App\Rankings\MarbleRankingsQueryHandler;
 use RuntimeException;
 use Sapien\Response;
 
@@ -19,12 +20,19 @@ use const JSON_THROW_ON_ERROR;
 
 final readonly class Home
 {
+    public function __construct(
+        private MarbleRankingsQueryHandler $queryHandler,
+    ) {
+    }
+
     public function __invoke(): Response
     {
         $title = 'College Football Marble Game';
         $description = 'Simple Rules for a Complex Season';
         $stylesheet = $this->getStylesheetFilename('styles.css');
         $currentYear = date('Y');
+
+        $rankings = $this->queryHandler->getRankings();
 
         ob_start();
         include __DIR__ . '/HomeTemplate.html.php';

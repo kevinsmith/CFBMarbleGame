@@ -3,8 +3,12 @@
  * @var string $title
  * @var string $description
  * @var string $stylesheet
+ * @var RankedTeam[] $rankings
  * @var string $currentYear
  */
+
+use App\Rankings\RankedTeam;
+
 ?>
 <!DOCTYPE html>
 <html lang="en-US">
@@ -41,6 +45,41 @@
                         <p>If you beat an FCS opponent, you get nothing, If you lose to an FCS opponent, they get 25% of your marbles. Because FU coward.</p>
                     </li>
                 </ol>
+            </div>
+            <div class="mt-8 px-4 sm:px-6 lg:px-8">
+                <div class="sm:flex sm:items-center">
+                    <div class="sm:flex-auto">
+                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Start of the Season</h1>
+                    </div>
+                </div>
+                <div class="mt-6 flow-root">
+                    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                            <table class="min-w-full divide-y divide-gray-300 dark:divide-white/15">
+                                <thead>
+                                <tr class="divide-x divide-gray-200 dark:divide-white/10">
+                                    <th scope="col" class="py-3.5 pr-4 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-0 dark:text-white">Marble Rank</th>
+                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Team</th>
+                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Marbles</th>
+                                    <th scope="col" class="py-3.5 pr-4 pl-4 text-left text-sm font-semibold text-gray-900 sm:pr-0 dark:text-white">Conference</th>
+                                </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white dark:divide-white/10 dark:bg-gray-900">
+                                    <?php foreach ($rankings as $team) : ?>
+                                        <tr class="divide-x divide-gray-200 dark:divide-white/10">
+                                            <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pl-0 dark:text-gray-300"><?=$team->marbleRank?></td>
+                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white"><?=$team->teamName?></td>
+                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"><?=$team->marbleCount?></td>
+                                            <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pr-0 dark:text-gray-300"><?=$team->conference?></td>
+                                        </tr>
+                                    <?php endforeach;
+
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
         <footer>

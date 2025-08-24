@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App;
 
 use App\HttpServer\Routes;
+use App\Rankings\InMemoryTeamRepository;
+use App\Rankings\TeamRepository;
 use DI\ContainerBuilder;
 use FastRoute\Dispatcher;
 use Monolog\Handler\StreamHandler;
@@ -13,6 +15,7 @@ use Monolog\Logger;
 use Monolog\Processor\WebProcessor;
 use Psr\Container\ContainerInterface;
 
+use function DI\autowire;
 use function FastRoute\simpleDispatcher;
 use function getenv;
 
@@ -46,6 +49,7 @@ final readonly class Container
                     ))
                     ->pushProcessor(new WebProcessor($serverData));
             },
+            TeamRepository::class => autowire(InMemoryTeamRepository::class),
         ];
     }
 }
