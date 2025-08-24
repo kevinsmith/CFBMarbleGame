@@ -44,4 +44,19 @@
             </property>
         </properties>
     </rule>
+
+    <!-- Exclude strict types requirement for template files -->
+    <rule ref="SlevomatCodingStandard.TypeHints.DeclareStrictTypes">
+        <exclude-pattern>*.html.php</exclude-pattern>
+    </rule>
+
+    <!-- Exclude requirement of only PHP in PHP files for template files -->
+    <rule ref="Generic.Files.InlineHTML.Found">
+        <exclude-pattern>*.html.php</exclude-pattern>
+    </rule>
+
+    <!-- Allow inline doc comments above non-assignment usage -->
+    <rule ref="SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration">
+        <exclude-pattern>*.html.php</exclude-pattern>
+    </rule>
 </ruleset>
