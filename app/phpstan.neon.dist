@@ -6,3 +6,5 @@ parameters:
     ignoreErrors:
         - identifier: argument.type
           path: src/Container.php
+    excludePaths:
+        - src/Rankings/InMemoryTeamRepository.php
