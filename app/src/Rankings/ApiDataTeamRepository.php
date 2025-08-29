@@ -4,23 +4,30 @@ declare(strict_types=1);
 
 namespace App\Rankings;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
+
 use function array_filter;
-use function file_get_contents;
+use function assert;
 use function in_array;
+use function is_array;
+use function is_int;
+use function is_numeric;
+use function is_string;
 use function json_decode;
 use function uasort;
 
 use const JSON_THROW_ON_ERROR;
 
-final class InMemoryTeamRepository implements TeamRepository
+final class ApiDataTeamRepository implements TeamRepository
 {
-    /** @var array<string> */
+    /** @var array<int, array<string, mixed>> */
     private array $teams;
 
-    /** @var array<string|int> */
+    /** @var array<int, array<string, mixed>> */
     private array $games;
 
-    public function __construct()
+    public function __construct(private Client $cfbdApi)
     {
         $this->init();
     }
@@ -30,13 +37,13 @@ final class InMemoryTeamRepository implements TeamRepository
     {
         $teamsWithMarbles = array_filter(
             $this->teams,
-            static function (array $team) {
+            static function (array $team): bool {
                 return $team['starting_marbles'] > 0;
             },
         );
 
         // Sort teams by marbles in descending order, then alphabetically
-        uasort($teamsWithMarbles, static function ($a, $b) {
+        uasort($teamsWithMarbles, static function (array $a, array $b): int {
             $marbleComparison = $b['starting_marbles'] <=> $a['starting_marbles'];
 
             return $marbleComparison !== 0 ? $marbleComparison : $a['name'] <=> $b['name'];
@@ -47,29 +54,49 @@ final class InMemoryTeamRepository implements TeamRepository
 
     private function init(): void
     {
-        $rawJson = file_get_contents(__DIR__ . '/games_2025.json');
+        $apiResponse = $this->cfbdApi->get(
+            '/games',
+            [
+                RequestOptions::QUERY => [
+                    'year' => '2025',
+                    'classification' => 'fbs',
+                ],
+            ],
+        );
 
-        $data = json_decode($rawJson, true, flags: JSON_THROW_ON_ERROR);
+        $data = json_decode($apiResponse->getBody()->getContents(), true, flags: JSON_THROW_ON_ERROR);
+        assert(is_array($data));
 
         foreach ($data as $game) {
-            $this->games[$game['id']] = [
-                'date' => $game['date'],
-                'season_type' => $game['season_type'],
+            assert(is_array($game));
+
+            $gameId = $game['id'];
+            assert(is_int($gameId));
+
+            $this->games[(int) $gameId] = [
+                'date' => $game['startDate'],
+                'season_type' => $game['seasonType'],
                 'week_number' => $game['week'],
-                'home_id' => $game['home_id'],
-                'away_id' => $game['away_id'],
+                'home_id' => $game['homeId'],
+                'away_id' => $game['awayId'],
             ];
 
-            $this->teams[$game['home_id']] = [
-                'name' => $game['home_name'],
-                'subdivision' => $game['home_subdivision'],
-                'conference' => $game['home_conference'],
+            $homeId = $game['homeId'];
+            assert(is_numeric($homeId));
+
+            $this->teams[(int) $homeId] = [
+                'name' => $game['homeTeam'],
+                'subdivision' => $game['homeClassification'],
+                'conference' => $game['homeConference'],
             ];
 
-            $this->teams[$game['away_id']] = [
-                'name' => $game['away_name'],
-                'subdivision' => $game['away_subdivision'],
-                'conference' => $game['away_conference'],
+            $awayId = $game['awayId'];
+            assert(is_numeric($awayId));
+
+            $this->teams[(int) $awayId] = [
+                'name' => $game['awayTeam'],
+                'subdivision' => $game['awayClassification'],
+                'conference' => $game['awayConference'],
             ];
         }
 
@@ -110,7 +137,7 @@ final class InMemoryTeamRepository implements TeamRepository
     }
 
     /**
-     * @param array<string> $sortedTeamsWithMarbles
+     * @param array<int, array<string, mixed>> $sortedTeamsWithMarbles
      *
      * @return Team[]
      */
@@ -129,6 +156,10 @@ final class InMemoryTeamRepository implements TeamRepository
 
             $teamsAtCurrentMarbleCount++;
             $previousMarbles = $team['starting_marbles'];
+
+            assert(is_string($team['name']));
+            assert(is_string($team['conference']));
+            assert(is_int($team['starting_marbles']));
 
             $rankedTeams[] = new Team(
                 $team['name'],

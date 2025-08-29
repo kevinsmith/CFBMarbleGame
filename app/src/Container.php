@@ -5,19 +5,24 @@ declare(strict_types=1);
 namespace App;
 
 use App\HttpServer\Routes;
-use App\Rankings\InMemoryTeamRepository;
+use App\Rankings\ApiDataTeamRepository;
 use App\Rankings\TeamRepository;
 use DI\ContainerBuilder;
 use FastRoute\Dispatcher;
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Processor\WebProcessor;
 use Psr\Container\ContainerInterface;
+use RuntimeException;
 
-use function DI\autowire;
 use function FastRoute\simpleDispatcher;
+use function file_exists;
+use function file_get_contents;
 use function getenv;
+use function trim;
 
 final readonly class Container
 {
@@ -49,7 +54,42 @@ final readonly class Container
                     ))
                     ->pushProcessor(new WebProcessor($serverData));
             },
-            TeamRepository::class => autowire(InMemoryTeamRepository::class),
+            TeamRepository::class => static function () {
+                $apiKey = self::getSecret('CFBD_API_KEY');
+
+                return new ApiDataTeamRepository(
+                    new Client([
+                        'base_uri' => 'https://api.collegefootballdata.com',
+                        RequestOptions::HEADERS => [
+                            'Authorization' => 'Bearer ' . $apiKey,
+                            'Accept' => 'application/json',
+                        ],
+                    ]),
+                );
+            },
         ];
+    }
+
+    private static function getSecret(string $name): string
+    {
+        $secretValue = getenv($name);
+
+        if ($secretValue) {
+            return $secretValue;
+        }
+
+        $dockerSecretPath = '/run/secrets/' . $name;
+
+        if (! file_exists($dockerSecretPath)) {
+            throw new RuntimeException('Docker secret file not found: ' . $dockerSecretPath);
+        }
+
+        $secretValue = file_get_contents($dockerSecretPath);
+
+        if ($secretValue === false) {
+            throw new RuntimeException('Failed to read secret: ' . $dockerSecretPath);
+        }
+
+        return trim($secretValue);
     }
 }

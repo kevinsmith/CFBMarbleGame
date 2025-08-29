@@ -15,7 +15,14 @@ services:
     networks:
       - traefik
       - default
+    secrets:
+      - CFBD_API_KEY
 
 networks:
   traefik:
     external: true
+
+secrets:
+  CFBD_API_KEY:
+    external: true
+    name: cfbmarblegame_prod_cfbd_api_key_v1
