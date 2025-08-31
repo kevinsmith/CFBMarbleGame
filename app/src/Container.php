@@ -17,6 +17,7 @@ use Monolog\Logger;
 use Monolog\Processor\WebProcessor;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 use function FastRoute\simpleDispatcher;
 use function file_exists;
@@ -65,6 +66,7 @@ final readonly class Container
                             'Accept' => 'application/json',
                         ],
                     ]),
+                    new FilesystemAdapter(),
                 );
             },
         ];

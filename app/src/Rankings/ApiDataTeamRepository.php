@@ -6,6 +6,8 @@ namespace App\Rankings;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 use function array_filter;
 use function assert;
@@ -27,8 +29,10 @@ final class ApiDataTeamRepository implements TeamRepository
     /** @var array<int, array<string, mixed>> */
     private array $games;
 
-    public function __construct(private Client $cfbdApi)
-    {
+    public function __construct(
+        private Client $cfbdApi,
+        private CacheInterface $cache,
+    ) {
         $this->init();
     }
 
@@ -54,17 +58,23 @@ final class ApiDataTeamRepository implements TeamRepository
 
     private function init(): void
     {
-        $apiResponse = $this->cfbdApi->get(
-            '/games',
-            [
-                RequestOptions::QUERY => [
-                    'year' => '2025',
-                    'classification' => 'fbs',
-                ],
-            ],
-        );
+        $apiResponse = $this->cache->get('cfbd_games', function (ItemInterface $item) {
+            $item->expiresAfter(3600);
 
-        $data = json_decode($apiResponse->getBody()->getContents(), true, flags: JSON_THROW_ON_ERROR);
+            $response = $this->cfbdApi->get(
+                '/games',
+                [
+                    RequestOptions::QUERY => [
+                        'year' => '2025',
+                        'classification' => 'fbs',
+                    ],
+                ],
+            );
+
+            return $response->getBody()->getContents();
+        });
+
+        $data = json_decode($apiResponse, true, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
 
         foreach ($data as $game) {
