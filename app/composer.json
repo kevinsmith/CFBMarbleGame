@@ -10,7 +10,8 @@
         "nikic/fast-route": "^1.3",
         "php-di/php-di": "^7.0",
         "psr/container": "^2.0",
-        "sapien/sapien": "^1.1"
+        "sapien/sapien": "^1.1",
+        "symfony/cache": "^7.3"
     },
     "config": {
         "sort-packages": true
