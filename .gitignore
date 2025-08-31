@@ -10,3 +10,4 @@ docs/Bruno
 app/node_modules/
 app/public/styles.*.css
 assets/
+.claude
