@@ -42,7 +42,7 @@ use App\Rankings\RankedTeam;
                         <p>Fractional marbles are rounded to nearest whole number. For example, if you beat an opponent with 210 marbles at their place, you would get 25% of their 210, 52.5, which would be rounded up to 53.</p>
                     </li>
                     <li>
-                        <p>If you beat an FCS opponent, you get nothing, If you lose to an FCS opponent, they get 25% of your marbles. Because FU coward.</p>
+                        <p>If you beat an FCS opponent, you get nothing. If you lose to an FCS opponent, they get 25% of your marbles. Because FU coward.</p>
                     </li>
                 </ol>
             </div>
