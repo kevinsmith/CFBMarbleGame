@@ -1,5 +1,8 @@
 NODE_AVAILABLE := $(shell command -v node 2> /dev/null)
 
+PHP_CONTAINER := $(shell docker compose ps -q web)
+PHP_RUN := docker exec -it $(PHP_CONTAINER)
+
 build_tools:
 	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml build
 
@@ -41,3 +44,12 @@ ifdef NODE_AVAILABLE
 else
 	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --service-ports --rm playwright npx --no-update-notifier playwright show-report --host 0.0.0.0
 endif
+
+migrate:
+	$(PHP_RUN) composer phinx migrate
+
+rollback:
+	$(PHP_RUN) composer phinx rollback
+
+migration:
+	$(PHP_RUN) composer phinx create $(name)
