@@ -16,6 +16,7 @@
     <!-- Include full Doctrine Coding Standard -->
     <rule ref="Doctrine">
         <exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+        <exclude name="SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion"/>
     </rule>
 
     <rule ref="SlevomatCodingStandard.ControlStructures.EarlyExit">
