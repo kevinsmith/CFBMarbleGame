@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App;
 
 use App\HttpServer\Routes;
-use App\Rankings\ApiDataTeamRepository;
 use App\Rankings\DataRefreshCommand;
+use App\Rankings\SqliteTeamRepository;
 use App\Rankings\TeamRepository;
 use DI\ContainerBuilder;
 use FastRoute\Dispatcher;
@@ -19,7 +19,6 @@ use Monolog\Processor\WebProcessor;
 use PDO;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 use function FastRoute\simpleDispatcher;
 use function file_exists;
@@ -58,17 +57,8 @@ final readonly class Container
                     ->pushProcessor(new WebProcessor($serverData));
             },
             TeamRepository::class => static function () {
-                $apiKey = self::getSecret('CFBD_API_KEY');
-
-                return new ApiDataTeamRepository(
-                    new Client([
-                        'base_uri' => 'https://api.collegefootballdata.com',
-                        RequestOptions::HEADERS => [
-                            'Authorization' => 'Bearer ' . $apiKey,
-                            'Accept' => 'application/json',
-                        ],
-                    ]),
-                    new FilesystemAdapter(),
+                return new SqliteTeamRepository(
+                    new PDO('sqlite:' . getenv('DB_PATH')),
                 );
             },
             DataRefreshCommand::class => static function () {

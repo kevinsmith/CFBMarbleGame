@@ -4,34 +4,22 @@ declare(strict_types=1);
 
 namespace App\Rankings;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\RequestOptions;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
+use PDO;
 
 use function array_filter;
-use function assert;
 use function in_array;
-use function is_array;
-use function is_int;
-use function is_numeric;
-use function is_string;
-use function json_decode;
 use function uasort;
 
-use const JSON_THROW_ON_ERROR;
-
-final class ApiDataTeamRepository implements TeamRepository
+final class SqliteTeamRepository implements TeamRepository
 {
-    /** @var array<int, array<string, mixed>> */
+    /** @var array<int, array{name: string, subdivision: Subdivision, conference: Conference, starting_marbles: int}> */
     private array $teams;
 
-    /** @var array<int, array<string, mixed>> */
+    /** @var array<int, array{season_type: SeasonType, week_number: int, home_id: int, away_id: int}> */
     private array $games;
 
     public function __construct(
-        private Client $cfbdApi,
-        private CacheInterface $cache,
+        private PDO $pdo,
     ) {
         $this->init();
     }
@@ -58,66 +46,55 @@ final class ApiDataTeamRepository implements TeamRepository
 
     private function init(): void
     {
-        $apiResponse = $this->cache->get('cfbd_games', function (ItemInterface $item) {
-            $item->expiresAfter(3600);
-
-            $response = $this->cfbdApi->get(
-                '/games',
-                [
-                    RequestOptions::QUERY => [
-                        'year' => '2025',
-                        'classification' => 'fbs',
-                    ],
-                ],
-            );
-
-            return $response->getBody()->getContents();
-        });
-
-        $data = json_decode($apiResponse, true, flags: JSON_THROW_ON_ERROR);
-        assert(is_array($data));
-
-        foreach ($data as $game) {
-            assert(is_array($game));
-
-            $gameId = $game['id'];
-            assert(is_int($gameId));
-
-            $this->games[(int) $gameId] = [
-                'date' => $game['startDate'],
-                'season_type' => $game['seasonType'],
-                'week_number' => $game['week'],
-                'home_id' => $game['homeId'],
-                'away_id' => $game['awayId'],
-            ];
-
-            $homeId = $game['homeId'];
-            assert(is_numeric($homeId));
-
-            $this->teams[(int) $homeId] = [
-                'name' => $game['homeTeam'],
-                'subdivision' => $game['homeClassification'],
-                'conference' => $game['homeConference'],
-            ];
-
-            $awayId = $game['awayId'];
-            assert(is_numeric($awayId));
-
-            $this->teams[(int) $awayId] = [
-                'name' => $game['awayTeam'],
-                'subdivision' => $game['awayClassification'],
-                'conference' => $game['awayConference'],
-            ];
-        }
+        $this->loadTeamsFromDatabase();
+        $this->loadGamesFromDatabase();
 
         foreach ($this->teams as $teamId => $team) {
             $this->calculateStartingMarbles($teamId);
         }
     }
 
+    private function loadTeamsFromDatabase(): void
+    {
+        $stmt = $this->pdo->prepare('SELECT id, name, subdivision, conference, cfbd_id FROM teams WHERE subdivision = :subdivision');
+        $stmt->execute(['subdivision' => Subdivision::FBS->name]);
+
+        $this->teams = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            /** @var array{id: int, name: string, subdivision: string, conference: string, cfbd_id: int} $row */
+            $this->teams[(int) $row['id']] = [
+                'name' => $row['name'],
+                'subdivision' => Subdivision::fromString($row['subdivision']),
+                'conference' => Conference::fromString($row['conference']),
+                'starting_marbles' => 0,
+            ];
+        }
+    }
+
+    private function loadGamesFromDatabase(): void
+    {
+        $stmt = $this->pdo->prepare(<<<'SQL'
+        SELECT id, cfbd_id, date, season_type, week_number, home_team_id, away_team_id
+        FROM games
+        WHERE season_type = :season_type
+        SQL);
+        $stmt->execute([':season_type' => SeasonType::Regular->name]);
+
+        $this->games = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            /** @var array{id: int, date: string, season_type: string, week_number: int, home_team_id: int, away_team_id: int} $row */
+            $this->games[(int) $row['id']] = [
+                'season_type' => SeasonType::fromString($row['season_type']),
+                'week_number' => (int) $row['week_number'],
+                'home_id' => (int) $row['home_team_id'],
+                'away_id' => (int) $row['away_team_id'],
+            ];
+        }
+    }
+
     private function calculateStartingMarbles(int $teamId): void
     {
-        if ($this->teams[$teamId]['subdivision'] !== 'fbs') {
+        if ($this->teams[$teamId]['subdivision']->name !== Subdivision::FBS->name) {
             $this->teams[$teamId]['starting_marbles'] = 0;
 
             return;
@@ -126,7 +103,12 @@ final class ApiDataTeamRepository implements TeamRepository
         $this->teams[$teamId]['starting_marbles'] = 100;
 
         // Add 10 marbles for each P4 opponent
-        $powerConferences = ['Big Ten', 'Big 12', 'ACC', 'SEC'];
+        $powerConferences = [
+            Conference::BigTen->value,
+            Conference::Big12->value,
+            Conference::ACC->value,
+            Conference::SEC->value,
+        ];
 
         foreach ($this->games as $game) {
             $opponentId = null;
@@ -139,7 +121,7 @@ final class ApiDataTeamRepository implements TeamRepository
 
             if (
                 $opponentId && isset($this->teams[$opponentId]) &&
-                in_array($this->teams[$opponentId]['conference'], $powerConferences)
+                in_array($this->teams[$opponentId]['conference']->value, $powerConferences, true)
             ) {
                 $this->teams[$teamId]['starting_marbles'] += 10;
             }
@@ -158,6 +140,7 @@ final class ApiDataTeamRepository implements TeamRepository
         $previousMarbles = null;
         $teamsAtCurrentMarbleCount = 0;
 
+        /** @var array{name: string, conference: Conference, starting_marbles: int} $team */
         foreach ($sortedTeamsWithMarbles as $team) {
             if ($previousMarbles !== null && $team['starting_marbles'] < $previousMarbles) {
                 $currentRank += $teamsAtCurrentMarbleCount;
@@ -167,13 +150,9 @@ final class ApiDataTeamRepository implements TeamRepository
             $teamsAtCurrentMarbleCount++;
             $previousMarbles = $team['starting_marbles'];
 
-            assert(is_string($team['name']));
-            assert(is_string($team['conference']));
-            assert(is_int($team['starting_marbles']));
-
             $rankedTeams[] = new Team(
                 $team['name'],
-                $team['conference'],
+                $team['conference']->value,
                 0,
                 0,
                 $team['starting_marbles'],
