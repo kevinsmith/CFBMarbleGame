@@ -33,7 +33,7 @@ use App\Rankings\RankedTeam;
             <div class="prose mt-12">
                 <ol>
                     <li>
-                        <p>Every FBS school starts off with 100 marbles, plus 10 bonus marbles for every P4 opponent on their schedule</p>
+                        <p>Every FBS school starts off with 100 marbles, plus 10 bonus marbles for every power conference opponent on their schedule</p>
                     </li>
                     <li>
                         <p>Beat your opponent at your home place or neutral site (<a href="https://x.com/iowahawkblog/status/1827118895842664563?s=46" rel="nofollow">including conference championships</a>), take 20% of their marbles; beat your opponent at their home place, take 25% of their marbles</p>

@@ -8,7 +8,7 @@ _[From David Burge](https://x.com/iowahawkblog/status/1706341845326876998), with
 
 Brief primer on the Marble Game algorithm:
 
-1. Every FBS school starts off with 100 marbles, plus 10 bonus marbles for every P4 opponent on their schedule
+1. Every FBS school starts off with 100 marbles, plus 10 bonus marbles for every power conference opponent on their schedule
 
 2. Beat your opponent at your home place or neutral site ([including conference championships](https://x.com/iowahawkblog/status/1827118895842664563?s=46)), take 20% of their marbles; beat your opponent at their home place, take 25% of their marbles
 
