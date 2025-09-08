@@ -1,4 +1,7 @@
 services:
   web:
+    environment:
+      - LOG_LEVEL=debug
+      - DB_PATH=/var/www/data/cfbmarblegame.db
     ports:
       - "9000:80"
