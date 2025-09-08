@@ -19,7 +19,7 @@ services:
     secrets:
       - CFBD_API_KEY
     volumes:
-      - cfbmarblegame_data:/var/www/data/cfbmarblegame.db
+      - cfbmarblegame_data:/var/www/data
 
 networks:
   traefik:
@@ -32,4 +32,3 @@ secrets:
 
 volumes:
   cfbmarblegame_data:
-    driver: local
