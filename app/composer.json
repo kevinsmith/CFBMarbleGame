@@ -13,7 +13,6 @@
         "psr/container": "^2.0",
         "robmorgan/phinx": "^0.16.10",
         "sapien/sapien": "^1.1",
-        "symfony/cache": "^7.3",
         "symfony/console": "^7.3"
     },
     "config": {
