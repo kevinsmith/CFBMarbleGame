@@ -6,6 +6,7 @@ namespace App;
 
 use App\HttpServer\Routes;
 use App\Rankings\ApiDataTeamRepository;
+use App\Rankings\GamesDataRetriever;
 use App\Rankings\TeamRepository;
 use DI\ContainerBuilder;
 use FastRoute\Dispatcher;
@@ -15,6 +16,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Processor\WebProcessor;
+use PDO;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -67,6 +69,20 @@ final readonly class Container
                         ],
                     ]),
                     new FilesystemAdapter(),
+                );
+            },
+            GamesDataRetriever::class => static function () {
+                $apiKey = self::getSecret('CFBD_API_KEY');
+
+                return new GamesDataRetriever(
+                    new Client([
+                        'base_uri' => 'https://api.collegefootballdata.com',
+                        RequestOptions::HEADERS => [
+                            'Authorization' => 'Bearer ' . $apiKey,
+                            'Accept' => 'application/json',
+                        ],
+                    ]),
+                    new PDO('sqlite:' . getenv('DB_PATH')),
                 );
             },
         ];
