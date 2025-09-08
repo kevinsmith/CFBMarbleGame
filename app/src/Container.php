@@ -6,7 +6,7 @@ namespace App;
 
 use App\HttpServer\Routes;
 use App\Rankings\ApiDataTeamRepository;
-use App\Rankings\GamesDataRetriever;
+use App\Rankings\DataRefreshCommand;
 use App\Rankings\TeamRepository;
 use DI\ContainerBuilder;
 use FastRoute\Dispatcher;
@@ -71,10 +71,10 @@ final readonly class Container
                     new FilesystemAdapter(),
                 );
             },
-            GamesDataRetriever::class => static function () {
+            DataRefreshCommand::class => static function () {
                 $apiKey = self::getSecret('CFBD_API_KEY');
 
-                return new GamesDataRetriever(
+                return new DataRefreshCommand(
                     new Client([
                         'base_uri' => 'https://api.collegefootballdata.com',
                         RequestOptions::HEADERS => [

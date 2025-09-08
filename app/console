@@ -1,0 +1,18 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use App\Rankings\DataRefreshCommand;
+use App\Container;
+use Symfony\Component\Console\Application;
+
+$container = Container::init();
+
+$application = new Application('CFB Marble Game Console', '1.0.0');
+
+$application->add($container->get(DataRefreshCommand::class));
+
+$application->run();

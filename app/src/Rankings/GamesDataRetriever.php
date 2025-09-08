@@ -9,6 +9,7 @@ use DateTimeImmutable;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use PDO;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
 
@@ -74,18 +75,25 @@ final readonly class GamesDataRetriever
     public function __construct(
         private Client $cfbdApiClient,
         private PDO $pdo,
+        private LoggerInterface $logger,
     ) {
     }
 
     public function pullAndStoreFreshData(): void
     {
+        $this->logger->notice('Starting data refresh from the CollegeFootballData.com API...');
+
         $data = $this->fetchFromCfbdApi();
+        $this->logger->notice('Successfully fetched data');
 
         [$games, $teams] = $this->extractGamesAndTeams($data);
+        $this->logger->notice('Extracted ' . count($teams) . ' teams and ' . count($games) . ' games');
 
         $this->saveTeams($teams);
 
         $this->saveGames($games);
+
+        $this->logger->notice('Data refresh completed successfully');
     }
 
     /** @return CfbdApiGamesResponse */
@@ -182,10 +190,11 @@ final readonly class GamesDataRetriever
 
             $this->pdo->commit();
 
-            echo 'Inserted or updated ' . count($teams) . ' teams successfully';
+            $this->logger->notice('Inserted or updated ' . count($teams) . ' teams successfully');
         } catch (Throwable $e) {
             $this->pdo->rollback();
-            echo 'Error: ' . $e->getMessage();
+
+            throw $e;
         }
     }
 
@@ -253,10 +262,11 @@ final readonly class GamesDataRetriever
 
             $this->pdo->commit();
 
-            echo 'Inserted or updated ' . count($games) . ' games successfully';
+            $this->logger->notice('Inserted or updated ' . count($games) . ' games successfully');
         } catch (Throwable $e) {
             $this->pdo->rollback();
-            echo 'Error: ' . $e->getMessage();
+
+            throw $e;
         }
     }
 

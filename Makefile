@@ -3,6 +3,9 @@ NODE_AVAILABLE := $(shell command -v node 2> /dev/null)
 PHP_CONTAINER := $(shell docker compose ps -q web)
 PHP_RUN := docker exec -it $(PHP_CONTAINER)
 
+console:
+	$(PHP_RUN) ./console $(command)
+
 build_tools:
 	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml build
 
