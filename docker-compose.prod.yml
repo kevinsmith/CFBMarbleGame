@@ -3,6 +3,7 @@ services:
   web:
     image: ${REGISTRY}/${APP_IMAGE}:${GIT_SHORT_SHA}
     deploy:
+      replicas: 1  # Important: only one replica with SQLite
       rollback_config:
         order: start-first
       update_config:
@@ -17,6 +18,8 @@ services:
       - default
     secrets:
       - CFBD_API_KEY
+    volumes:
+      - cfbmarblegame_data:/var/www/data/cfbmarblegame.db
 
 networks:
   traefik:
@@ -26,3 +29,7 @@ secrets:
   CFBD_API_KEY:
     external: true
     name: cfbmarblegame_prod_cfbd_api_key_v1
+
+volumes:
+  cfbmarblegame_data:
+    driver: local
