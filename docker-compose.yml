@@ -1,5 +1,7 @@
 services:
   web:
+    environment:
+      - DB_PATH=/var/www/data/cfbmarblegame.db
     build:
       dockerfile: docker/app/Dockerfile
       target: prod
