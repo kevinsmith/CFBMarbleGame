@@ -33,7 +33,7 @@ final class DataRefreshCommand extends Command
             LogLevel::NOTICE => OutputInterface::VERBOSITY_NORMAL,
         ]);
 
-        $retriever = new GamesDataRetriever(
+        $retriever = new GamesDataRefresher(
             $this->cfbdApiClient,
             $this->pdo,
             $consoleLogger,

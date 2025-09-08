@@ -70,7 +70,7 @@ use const JSON_THROW_ON_ERROR;
  *     away_team_points: ?int
  * }
  */
-final readonly class GamesDataRetriever
+final readonly class GamesDataRefresher
 {
     public function __construct(
         private Client $cfbdApiClient,
