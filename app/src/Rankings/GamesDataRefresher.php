@@ -221,15 +221,15 @@ final readonly class GamesDataRefresher
             $this->pdo->beginTransaction();
 
             $stmt = $this->pdo->prepare(<<<'SQL'
-            INSERT INTO games (date, week_number, neutral_site, home_team_id, away_team_id, winner_team_id, cfbd_id)
-                VALUES (:date, :week_number, :neutral_site, :home_team_id, :away_team_id, :winner_team_id, :cfbd_id)
+            INSERT INTO games (date, week_number, neutral_site, home_team_id, away_team_id, winner, cfbd_id)
+                VALUES (:date, :week_number, :neutral_site, :home_team_id, :away_team_id, :winner, :cfbd_id)
             ON CONFLICT(cfbd_id) DO UPDATE SET
                 date = :date,
                 week_number = :week_number,
                 neutral_site = :neutral_site,
                 home_team_id = :home_team_id,
                 away_team_id = :away_team_id,
-                winner_team_id = :winner_team_id,
+                winner = :winner,
                 cfbd_id = :cfbd_id;
             SQL);
 
@@ -251,7 +251,7 @@ final readonly class GamesDataRefresher
                     'neutral_site' => $game['neutral_site'],
                     'home_team_id' => $homeTeamId,
                     'away_team_id' => $awayTeamId,
-                    'winner_team_id' => $this->determineWinnerTeamId($game, $homeTeamId, $awayTeamId),
+                    'winner' => $this->determineWinner($game)?->value,
                     'cfbd_id' => $cfbdId,
                 ]);
             }
@@ -267,18 +267,18 @@ final readonly class GamesDataRefresher
     }
 
     /** @param GameArray $game */
-    private function determineWinnerTeamId(array $game, int $homeTeamId, int $awayTeamId): int|null
+    private function determineWinner(array $game): Winner|null
     {
         if ($game['home_team_points'] === null || $game['away_team_points'] === null) {
             return null;
         }
 
         if ($game['home_team_points'] > $game['away_team_points']) {
-            return $homeTeamId;
+            return Winner::Home;
         }
 
         if ($game['home_team_points'] < $game['away_team_points']) {
-            return $awayTeamId;
+            return Winner::Away;
         }
 
         throw new RuntimeException('Impossible condition: home and away team points are equal');
