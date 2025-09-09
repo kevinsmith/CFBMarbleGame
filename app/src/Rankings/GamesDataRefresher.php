@@ -61,7 +61,6 @@ use const JSON_THROW_ON_ERROR;
  * }
  * @phpstan-type GameArray array{
  *     date: DateTimeImmutable,
- *     season_type: SeasonType,
  *     week_number: int,
  *     neutral_site: int,
  *     home_team_cfbd_id: int,
@@ -135,7 +134,6 @@ final readonly class GamesDataRefresher
 
             $games[$gameId] = [
                 'date' => $gameDate,
-                'season_type' => SeasonType::fromString($game['seasonType']),
                 'week_number' => (int) $game['week'],
                 'neutral_site' => (int) $game['neutralSite'],
                 'home_team_cfbd_id' => (int) $game['homeId'],
@@ -223,11 +221,10 @@ final readonly class GamesDataRefresher
             $this->pdo->beginTransaction();
 
             $stmt = $this->pdo->prepare(<<<'SQL'
-            INSERT INTO games (date, season_type, week_number, neutral_site, home_team_id, away_team_id, winner_team_id, cfbd_id)
-                VALUES (:date, :season_type, :week_number, :neutral_site, :home_team_id, :away_team_id, :winner_team_id, :cfbd_id)
+            INSERT INTO games (date, week_number, neutral_site, home_team_id, away_team_id, winner_team_id, cfbd_id)
+                VALUES (:date, :week_number, :neutral_site, :home_team_id, :away_team_id, :winner_team_id, :cfbd_id)
             ON CONFLICT(cfbd_id) DO UPDATE SET
                 date = :date,
-                season_type = :season_type,
                 week_number = :week_number,
                 neutral_site = :neutral_site,
                 home_team_id = :home_team_id,
@@ -249,7 +246,6 @@ final readonly class GamesDataRefresher
                 }
 
                 $stmt->execute([
-                    'season_type' => $game['season_type']->name,
                     'date' => $game['date']->format(DateFormat::SQLITE),
                     'week_number' => $game['week_number'],
                     'neutral_site' => $game['neutral_site'],

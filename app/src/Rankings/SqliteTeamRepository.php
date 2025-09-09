@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rankings;
 
 use PDO;
+use RuntimeException;
 
 use function array_filter;
 use function in_array;
@@ -15,7 +16,7 @@ final class SqliteTeamRepository implements TeamRepository
     /** @var array<int, array{name: string, subdivision: Subdivision, conference: Conference, starting_marbles: int}> */
     private array $teams;
 
-    /** @var array<int, array{season_type: SeasonType, week_number: int, home_id: int, away_id: int}> */
+    /** @var array<int, array{week_number: int, home_id: int, away_id: int}> */
     private array $games;
 
     public function __construct(
@@ -73,18 +74,20 @@ final class SqliteTeamRepository implements TeamRepository
 
     private function loadGamesFromDatabase(): void
     {
-        $stmt = $this->pdo->prepare(<<<'SQL'
-        SELECT id, cfbd_id, date, season_type, week_number, home_team_id, away_team_id
-        FROM games
-        WHERE season_type = :season_type
-        SQL);
-        $stmt->execute([':season_type' => SeasonType::Regular->name]);
+        $query = $this->pdo->query(
+            'SELECT id, cfbd_id, date, week_number, home_team_id, away_team_id FROM games',
+            PDO::FETCH_ASSOC,
+        );
+
+        if ($query === false) {
+            throw new RuntimeException('Failed to fetch games from database');
+        }
 
         $this->games = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            /** @var array{id: int, date: string, season_type: string, week_number: int, home_team_id: int, away_team_id: int} $row */
+
+        foreach ($query as $row) {
+            /** @var array{id: int, date: string, week_number: int, home_team_id: int, away_team_id: int} $row */
             $this->games[(int) $row['id']] = [
-                'season_type' => SeasonType::fromString($row['season_type']),
                 'week_number' => (int) $row['week_number'],
                 'home_id' => (int) $row['home_team_id'],
                 'away_id' => (int) $row['away_team_id'],
