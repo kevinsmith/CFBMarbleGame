@@ -8,25 +8,29 @@ use function array_map;
 
 final readonly class MarbleRankingsQueryHandler
 {
-    public function __construct(private TeamRepository $teamRepository)
-    {
+    public function __construct(
+        private TeamRepository $teamRepository,
+        private GameRepository $gameRepository,
+        private MarbleOrchestrator $marbleOrchestrator,
+    ) {
     }
 
     /** @return RankedTeam[] */
     public function getRankings(): array
     {
+        $teams = $this->teamRepository->getTeams();
+        $games = $this->gameRepository->getGames();
+
         return array_map(
             static function (Team $team): RankedTeam {
                 return new RankedTeam(
                     $team->teamName,
-                    $team->conference,
-                    $team->wins,
-                    $team->losses,
-                    $team->marbleCount,
-                    $team->marbleRank,
+                    $team->conference->value,
+                    $team->getMarbles(),
+                    $team->getMarbleRank(),
                 );
             },
-            $this->teamRepository->findTeamsWithMarbles(),
+            $this->marbleOrchestrator->getRankedTeams($teams, $games),
         );
     }
 }

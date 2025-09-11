@@ -7,5 +7,7 @@ namespace App\Rankings;
 interface TeamRepository
 {
     /** @return Team[] */
-    public function findTeamsWithMarbles(): array;
+    public function getTeams(): array;
+
+    public function getTeam(TeamId $teamId): Team;
 }

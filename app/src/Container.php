@@ -6,6 +6,8 @@ namespace App;
 
 use App\HttpServer\Routes;
 use App\Rankings\DataRefreshCommand;
+use App\Rankings\GameRepository;
+use App\Rankings\SqliteGameRepository;
 use App\Rankings\SqliteTeamRepository;
 use App\Rankings\TeamRepository;
 use DI\ContainerBuilder;
@@ -56,12 +58,21 @@ final readonly class Container
                     ))
                     ->pushProcessor(new WebProcessor($serverData));
             },
-            TeamRepository::class => static function () {
+            PDO::class => static function () {
+                return new PDO('sqlite:' . getenv('DB_PATH'));
+            },
+            TeamRepository::class => static function (ContainerInterface $c) {
                 return new SqliteTeamRepository(
-                    new PDO('sqlite:' . getenv('DB_PATH')),
+                    $c->get(PDO::class),
                 );
             },
-            DataRefreshCommand::class => static function () {
+            GameRepository::class => static function (ContainerInterface $c) {
+                return new SqliteGameRepository(
+                    $c->get(PDO::class),
+                    $c->get(TeamRepository::class),
+                );
+            },
+            DataRefreshCommand::class => static function (ContainerInterface $c) {
                 $apiKey = self::getSecret('CFBD_API_KEY');
 
                 return new DataRefreshCommand(
@@ -72,7 +83,7 @@ final readonly class Container
                             'Accept' => 'application/json',
                         ],
                     ]),
-                    new PDO('sqlite:' . getenv('DB_PATH')),
+                    $c->get(PDO::class),
                 );
             },
         ];
