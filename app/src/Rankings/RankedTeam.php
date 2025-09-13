@@ -11,6 +11,7 @@ final readonly class RankedTeam
         public string $conference,
         public int $marbleCount,
         public int $marbleRank,
+        public bool $isFCS,
     ) {
     }
 }

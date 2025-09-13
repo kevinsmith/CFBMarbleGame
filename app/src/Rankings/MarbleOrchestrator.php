@@ -32,11 +32,11 @@ final readonly class MarbleOrchestrator
             $this->doleOutInitialMarbles($team, $games);
         }
 
-        $teams = $this->removeTeamsWithoutMarbles($teams);
-
         foreach ($this->gamesFromCompleteWeeks($games) as $game) {
             $this->awardMarbles($game);
         }
+
+        $teams = $this->removeTeamsWithoutMarbles($teams);
 
         return $this->applyStandardCompetitionRanking($teams);
     }

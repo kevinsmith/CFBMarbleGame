@@ -66,9 +66,10 @@ use App\Rankings\RankedTeam;
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 bg-white dark:divide-white/10 dark:bg-gray-900">
                                     <?php foreach ($rankings as $team) : ?>
+                                        <?php $teamFootnote = $team->isFCS ? '*' : ''; ?>
                                         <tr class="divide-x divide-gray-200 dark:divide-white/10">
                                             <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pl-0 dark:text-gray-300"><?=$team->marbleRank?></td>
-                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white"><?=$team->teamName?></td>
+                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white"><?=$team->teamName . $teamFootnote?></td>
                                             <td class="p-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"><?=$team->marbleCount?></td>
                                             <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pr-0 dark:text-gray-300"><?=$team->conference?></td>
                                         </tr>
@@ -79,6 +80,9 @@ use App\Rankings\RankedTeam;
                             </table>
                         </div>
                     </div>
+                </div>
+                <div class="py-4 text-xs text-gray-500">
+                    <span class="align-top">*</span> FCS
                 </div>
             </div>
         </main>

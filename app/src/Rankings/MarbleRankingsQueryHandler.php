@@ -28,6 +28,7 @@ final readonly class MarbleRankingsQueryHandler
                     $team->conference->value,
                     $team->getMarbles(),
                     $team->getMarbleRank(),
+                    $team->subdivision === Subdivision::FCS,
                 );
             },
             $this->marbleOrchestrator->getRankedTeams($teams, $games),
