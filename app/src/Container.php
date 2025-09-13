@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use App\HttpServer\Routes;
+use App\Rankings\CachedTeamRepository;
 use App\Rankings\DataRefreshCommand;
 use App\Rankings\GameRepository;
 use App\Rankings\SqliteGameRepository;
@@ -62,8 +63,10 @@ final readonly class Container
                 return new PDO('sqlite:' . getenv('DB_PATH'));
             },
             TeamRepository::class => static function (ContainerInterface $c) {
-                return new SqliteTeamRepository(
-                    $c->get(PDO::class),
+                return new CachedTeamRepository(
+                    new SqliteTeamRepository(
+                        $c->get(PDO::class),
+                    ),
                 );
             },
             GameRepository::class => static function (ContainerInterface $c) {

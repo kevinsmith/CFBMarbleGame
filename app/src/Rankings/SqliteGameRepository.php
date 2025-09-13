@@ -11,7 +11,7 @@ final readonly class SqliteGameRepository implements GameRepository
 {
     public function __construct(
         private PDO $pdo,
-        private SqliteTeamRepository $teamRepository,
+        private TeamRepository $teamRepository,
     ) {
     }
 
