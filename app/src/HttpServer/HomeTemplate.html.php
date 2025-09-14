@@ -49,7 +49,7 @@ use App\Rankings\RankedTeam;
             <div class="mt-8 px-4 sm:px-6 lg:px-8">
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
-                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Start of the Season</h1>
+                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Rankings After Week 3</h1>
                     </div>
                 </div>
                 <div class="mt-6 flow-root">
