@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace App\Rankings;
 
+use Psr\Log\LoggerInterface;
+
 use function array_filter;
+use function array_merge;
 use function array_values;
 use function in_array;
+use function ksort;
+use function round;
 use function uasort;
 
 final readonly class MarbleOrchestrator
 {
+    public function __construct(private LoggerInterface $logger)
+    {
+    }
+
     /**
      * @param Team[] $teams
      * @param Game[] $games
@@ -24,6 +33,10 @@ final readonly class MarbleOrchestrator
         }
 
         $teams = $this->removeTeamsWithoutMarbles($teams);
+
+        foreach ($this->gamesFromCompleteWeeks($games) as $game) {
+            $this->awardMarbles($game);
+        }
 
         return $this->applyStandardCompetitionRanking($teams);
     }
@@ -51,7 +64,7 @@ final readonly class MarbleOrchestrator
             }
         }
 
-        $team->receiveInitialMarbles($initialMarbles);
+        $team->receiveMarbles($initialMarbles);
     }
 
     /**
@@ -93,6 +106,135 @@ final readonly class MarbleOrchestrator
                 },
             ),
         );
+    }
+
+    /**
+     * @param Game[] $games
+     *
+     * @return Game[]
+     */
+    private function gamesFromCompleteWeeks(array $games): array
+    {
+        $gamesByWeek = [];
+
+        foreach ($games as $game) {
+            $gamesByWeek[$game->weekNumber][] = $game;
+        }
+
+        ksort($gamesByWeek);
+
+        $gamesFromCompleteWeeks = [];
+
+        foreach ($gamesByWeek as $gamesForTheWeek) {
+            if (! $this->isWeekComplete($gamesForTheWeek)) {
+                return $gamesFromCompleteWeeks;
+            }
+
+            $gamesFromCompleteWeeks = array_merge($gamesFromCompleteWeeks, $gamesForTheWeek);
+        }
+
+        return $gamesFromCompleteWeeks;
+    }
+
+    /** @param Game[] $gamesForTheWeek */
+    private function isWeekComplete(array $gamesForTheWeek): bool
+    {
+        foreach ($gamesForTheWeek as $game) {
+            if ($game->winner === null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function awardMarbles(Game $game): void
+    {
+        $loggerContext = [
+            'game' => [
+                'id' => $game->id->id,
+                'date' => $game->date->format('Y-m-d'),
+                'week' => $game->weekNumber,
+                'neutral_site' => $game->neutralSite,
+                'winner' => $game->winner?->value,
+            ],
+        ];
+
+        $winner = $this->getWinner($game);
+        $loser = $this->getLoser($game);
+
+        $loggerContext['winner'] = [
+            'id' => $winner->id->id,
+            'team' => $winner->teamName,
+            'subdivision' => $winner->subdivision->name,
+            'conference' => $winner->conference->value,
+            'marbles_before_game' => $winner->getMarbles(),
+        ];
+        $loggerContext['loser'] = [
+            'id' => $loser->id->id,
+            'team' => $loser->teamName,
+            'subdivision' => $loser->subdivision->name,
+            'conference' => $loser->conference->value,
+            'marbles_before_game' => $loser->getMarbles(),
+        ];
+
+        if ($loser->subdivision === Subdivision::FCS) {
+            // This also means that games involving 2 FCS teams with marbles won't award
+            // marbles to the winner. Bug in the algorithm?
+            $this->logger->debug('Loser was FCS. No marbles to move.', $loggerContext);
+
+            return;
+        }
+
+        $winPercentage = $this->determineWinPercentage($game);
+
+        $loggerContext['win_percentage'] = $winPercentage * 100 . '%';
+
+        $marblesToMove = (int) round($loser->getMarbles() * $winPercentage);
+
+        $loser->giveUpMarbles($marblesToMove);
+        $winner->receiveMarbles($marblesToMove);
+
+        $loggerContext['marbles_awarded'] = $marblesToMove;
+        $loggerContext['winner']['marbles_after_game'] = $winner->getMarbles();
+        $loggerContext['loser']['marbles_after_game'] = $loser->getMarbles();
+
+        $this->logger->debug('Marbles awarded.', $loggerContext);
+    }
+
+    private function determineWinPercentage(Game $game): float
+    {
+        if ($this->getWinner($game)->subdivision === Subdivision::FCS) {
+            return 0.25;
+        }
+
+        if ($game->neutralSite) {
+            return 0.2;
+        }
+
+        if ($game->winner === Winner::Away) {
+            return 0.25;
+        }
+
+        return 0.2;
+    }
+
+    private function getWinner(Game $game): Team
+    {
+        if ($game->winner === Winner::Home) {
+            return $game->homeTeam;
+        }
+
+        return $game->awayTeam;
+    }
+
+    private function getLoser(Game $game): Team
+    {
+        if ($game->winner === Winner::Home) {
+            return $game->awayTeam;
+        }
+
+        return $game->homeTeam;
     }
 
     /**

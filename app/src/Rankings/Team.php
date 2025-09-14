@@ -8,7 +8,7 @@ use InvalidArgumentException;
 
 final class Team
 {
-    private int $initialMarbles = 0;
+    private int $marbles = 0;
 
     private int $marbleRank;
 
@@ -20,18 +20,27 @@ final class Team
     ) {
     }
 
-    public function receiveInitialMarbles(int $marbles): void
+    public function receiveMarbles(int $marbles): void
     {
         if ($marbles < 0) {
             throw new InvalidArgumentException('Marbles cannot be negative');
         }
 
-        $this->initialMarbles = $marbles;
+        $this->marbles += $marbles;
+    }
+
+    public function giveUpMarbles(int $marbles): void
+    {
+        if ($marbles < 0) {
+            throw new InvalidArgumentException('Marbles cannot be negative');
+        }
+
+        $this->marbles -= $marbles;
     }
 
     public function getMarbles(): int
     {
-        return $this->initialMarbles;
+        return $this->marbles;
     }
 
     public function setMarbleRank(int $rank): void

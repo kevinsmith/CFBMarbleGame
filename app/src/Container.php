@@ -8,6 +8,7 @@ use App\HttpServer\Routes;
 use App\Rankings\CachedTeamRepository;
 use App\Rankings\DataRefreshCommand;
 use App\Rankings\GameRepository;
+use App\Rankings\MarbleOrchestrator;
 use App\Rankings\SqliteGameRepository;
 use App\Rankings\SqliteTeamRepository;
 use App\Rankings\TeamRepository;
@@ -88,6 +89,9 @@ final readonly class Container
                     ]),
                     $c->get(PDO::class),
                 );
+            },
+            MarbleOrchestrator::class => static function (ContainerInterface $c) {
+                return new MarbleOrchestrator($c->get(Logger::class));
             },
         ];
     }
