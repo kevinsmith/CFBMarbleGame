@@ -15,13 +15,17 @@ final readonly class MarbleRankingsQueryHandler
     ) {
     }
 
-    /** @return RankedTeam[] */
-    public function getRankings(): array
+    /** @return array{0: int|null, 1: array<RankedTeam>} */
+    public function getRankings(int|null $week = null): array
     {
         $teams = $this->teamRepository->getTeams();
         $games = $this->gameRepository->getGames();
 
-        return array_map(
+        if ($week === null) {
+            $week = 3;
+        }
+
+        $rankings = array_map(
             static function (Team $team): RankedTeam {
                 return new RankedTeam(
                     $team->teamName,
@@ -33,5 +37,7 @@ final readonly class MarbleRankingsQueryHandler
             },
             $this->marbleOrchestrator->getRankedTeams($teams, $games),
         );
+
+        return [$week, $rankings];
     }
 }

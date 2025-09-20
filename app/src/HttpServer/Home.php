@@ -32,7 +32,7 @@ final readonly class Home
         $stylesheet = $this->getStylesheetFilename('styles.css');
         $currentYear = date('Y');
 
-        $rankings = $this->queryHandler->getRankings();
+        [$week, $rankings] = $this->queryHandler->getRankings();
 
         ob_start();
         include __DIR__ . '/HomeTemplate.html.php';
