@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Rankings;
 
+use InvalidArgumentException;
+
 use function array_map;
 
 final readonly class MarbleRankingsQueryHandler
@@ -21,8 +23,12 @@ final readonly class MarbleRankingsQueryHandler
         $teams = $this->teamRepository->getTeams();
         $games = $this->gameRepository->getGames();
 
+        $mostRecentCompleteWeek = $this->marbleOrchestrator->determineMostRecentCompleteWeek($games);
+
         if ($week === null) {
-            $week = 3;
+            $week = $mostRecentCompleteWeek;
+        } elseif ($week > $mostRecentCompleteWeek) {
+            throw new InvalidArgumentException('Given week cannot be more recent than the most recent complete week.');
         }
 
         $rankings = array_map(
@@ -35,7 +41,7 @@ final readonly class MarbleRankingsQueryHandler
                     $team->subdivision === Subdivision::FCS,
                 );
             },
-            $this->marbleOrchestrator->getRankedTeams($teams, $games),
+            $this->marbleOrchestrator->getRankedTeams($week, $teams, $games),
         );
 
         return [$week, $rankings];

@@ -26,19 +26,41 @@ final readonly class MarbleOrchestrator
      *
      * @return Team[]
      */
-    public function getRankedTeams(array $teams, array $games): array
+    public function getRankedTeams(int $week, array $teams, array $games): array
     {
         foreach ($teams as $team) {
             $this->doleOutInitialMarbles($team, $games);
         }
 
-        foreach ($this->gamesFromCompleteWeeks($games) as $game) {
+        foreach ($this->gamesThroughWeek($week, $games) as $game) {
             $this->awardMarbles($game);
         }
 
         $teams = $this->removeTeamsWithoutMarbles($teams);
 
         return $this->applyStandardCompetitionRanking($teams);
+    }
+
+    /** @param Game[] $games */
+    public function determineMostRecentCompleteWeek(array $games): int
+    {
+        $gamesByWeek = [];
+
+        foreach ($games as $game) {
+            $gamesByWeek[$game->weekNumber][] = $game;
+        }
+
+        ksort($gamesByWeek);
+
+        $mostRecentCompleteWeek = 0;
+
+        foreach ($gamesByWeek as $week => $gamesForTheWeek) {
+            if ($this->isWeekComplete($gamesForTheWeek)) {
+                $mostRecentCompleteWeek = $week;
+            }
+        }
+
+        return $mostRecentCompleteWeek;
     }
 
     /** @param Game[] $games */
@@ -113,27 +135,19 @@ final readonly class MarbleOrchestrator
      *
      * @return Game[]
      */
-    private function gamesFromCompleteWeeks(array $games): array
+    private function gamesThroughWeek(int $week, array $games): array
     {
         $gamesByWeek = [];
 
         foreach ($games as $game) {
-            $gamesByWeek[$game->weekNumber][] = $game;
+            if ($game->weekNumber <= $week) {
+                $gamesByWeek[$game->weekNumber][] = $game;
+            }
         }
 
         ksort($gamesByWeek);
 
-        $gamesFromCompleteWeeks = [];
-
-        foreach ($gamesByWeek as $gamesForTheWeek) {
-            if (! $this->isWeekComplete($gamesForTheWeek)) {
-                return $gamesFromCompleteWeeks;
-            }
-
-            $gamesFromCompleteWeeks = array_merge($gamesFromCompleteWeeks, $gamesForTheWeek);
-        }
-
-        return $gamesFromCompleteWeeks;
+        return array_merge(...$gamesByWeek);
     }
 
     /** @param Game[] $gamesForTheWeek */
