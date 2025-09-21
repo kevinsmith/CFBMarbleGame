@@ -281,6 +281,6 @@ final readonly class GamesDataRefresher
             return Winner::Away;
         }
 
-        throw new RuntimeException('Impossible condition: home and away team points are equal');
+        throw new RuntimeException('Impossible condition: home and away team points are equal for the week ' . $game['week_number'] . ' game between ' . $game['home_team_cfbd_id'] . ' and ' . $game['away_team_cfbd_id']);
     }
 }
