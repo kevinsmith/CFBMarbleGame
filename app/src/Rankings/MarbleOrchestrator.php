@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Rankings;
 
+use App\Rankings\Games\Game;
+use App\Rankings\Games\Winner;
 use Psr\Log\LoggerInterface;
 
 use function array_filter;

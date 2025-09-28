@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Rankings;
+namespace App\Rankings\Games;
 
 final readonly class GameId
 {

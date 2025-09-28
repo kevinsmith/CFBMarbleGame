@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Rankings;
+namespace App\Rankings\Games;
 
 use App\DateFormat;
+use App\Rankings\TeamId;
+use App\Rankings\TeamRepository;
 use DateTimeImmutable;
 use PDO;
 use RuntimeException;

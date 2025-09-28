@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rankings;
 
+use App\Rankings\Games\GameRepository;
 use InvalidArgumentException;
 
 use function array_map;
