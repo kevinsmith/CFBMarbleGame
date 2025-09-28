@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\DataLoader\DataRefreshCommand;
 use App\HttpServer\Routes;
 use App\Rankings\CachedTeamRepository;
-use App\Rankings\DataRefreshCommand;
 use App\Rankings\GameRepository;
 use App\Rankings\MarbleOrchestrator;
 use App\Rankings\SqliteGameRepository;

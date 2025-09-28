@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Rankings;
+namespace App\DataLoader;
 
 use App\DateFormat;
+use App\Rankings\Conference;
+use App\Rankings\Subdivision;
+use App\Rankings\Winner;
 use DateTimeImmutable;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Rankings;
+namespace App\DataLoader;
 
 use GuzzleHttp\Client;
 use PDO;
