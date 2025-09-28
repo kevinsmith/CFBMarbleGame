@@ -6,12 +6,12 @@ namespace App;
 
 use App\DataLoader\DataRefreshCommand;
 use App\HttpServer\Routes;
-use App\Rankings\CachedTeamRepository;
 use App\Rankings\Games\GameRepository;
 use App\Rankings\Games\SqliteGameRepository;
 use App\Rankings\MarbleOrchestrator;
-use App\Rankings\SqliteTeamRepository;
-use App\Rankings\TeamRepository;
+use App\Rankings\Teams\CachedTeamRepository;
+use App\Rankings\Teams\SqliteTeamRepository;
+use App\Rankings\Teams\TeamRepository;
 use DI\ContainerBuilder;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;

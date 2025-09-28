@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\DataLoader;
 
 use App\DateFormat;
-use App\Rankings\Conference;
 use App\Rankings\Games\Winner;
-use App\Rankings\Subdivision;
+use App\Rankings\Teams\Conference;
+use App\Rankings\Teams\Subdivision;
 use DateTimeImmutable;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;

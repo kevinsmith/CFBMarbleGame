@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Rankings;
 
 use App\Rankings\Games\GameRepository;
+use App\Rankings\Teams\Subdivision;
+use App\Rankings\Teams\Team;
+use App\Rankings\Teams\TeamRepository;
 use InvalidArgumentException;
 
 use function array_map;

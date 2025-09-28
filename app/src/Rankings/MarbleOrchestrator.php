@@ -6,6 +6,9 @@ namespace App\Rankings;
 
 use App\Rankings\Games\Game;
 use App\Rankings\Games\Winner;
+use App\Rankings\Teams\Conference;
+use App\Rankings\Teams\Subdivision;
+use App\Rankings\Teams\Team;
 use Psr\Log\LoggerInterface;
 
 use function array_filter;

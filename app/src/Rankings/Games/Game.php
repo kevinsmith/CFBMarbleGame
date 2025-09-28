@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rankings\Games;
 
-use App\Rankings\Team;
+use App\Rankings\Teams\Team;
 use DateTimeInterface;
 
 final readonly class Game
