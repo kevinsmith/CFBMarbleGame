@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\HttpServer;
+namespace App\Rankings;
 
-use App\Rankings\MarbleRankingsQueryHandler;
 use RuntimeException;
 use Sapien\Response;
 
