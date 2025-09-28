@@ -90,6 +90,8 @@ final readonly class GamesDataRefresher
 
         $this->saveTeams($teams);
 
+        $games = $this->applyDataCorrectionsToGames($games);
+
         $this->saveGames($games);
 
         $this->logger->notice('Data refresh completed successfully');
@@ -210,6 +212,22 @@ final readonly class GamesDataRefresher
         }
 
         return $mapping;
+    }
+
+    /**
+     * @param GameArray[] $games
+     *
+     * @return GameArray[]
+     */
+    private function applyDataCorrectionsToGames(array $games): array
+    {
+        foreach ($games as $cfbdId => $game) {
+            if ($cfbdId === 401760380) {
+                $games[$cfbdId]['away_team_points'] = 6;
+            }
+        }
+
+        return $games;
     }
 
     /** @param GameArray[] $games */
