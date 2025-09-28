@@ -223,11 +223,6 @@ final readonly class GamesDataRefresher
     private function applyDataCorrectionsToGames(array $games): array
     {
         foreach ($games as $cfbdId => $game) {
-            // Northern Illinois v. San Diego State on Sept. 27, 2025
-            if ($cfbdId === 401760380) {
-                $games[$cfbdId]['away_team_points'] = 6;
-            }
-
             // Sam Houston home games are hosted at Shell Energy Stadium for 2025. These are not neutral site games.
             if (in_array($cfbdId, [401757224, 401757279, 401757284, 401757300, 401757311], true)) {
                 $games[$cfbdId]['neutral_site'] = 0;
