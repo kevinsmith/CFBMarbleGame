@@ -85,8 +85,13 @@ final readonly class MarbleOrchestrator
         ];
 
         foreach ($this->getOpponents($team, $games) as $opponent) {
-            // Add 10 marbles for each power conference opponent
+            // Add 10 marbles if opponent is a power conference team
             if (in_array($opponent->conference, $powerConferences, true)) {
+                $initialMarbles += 10;
+            }
+
+            // Add 10 marbles if the opponent is Notre Dame
+            if ($opponent->teamName === 'Notre Dame') {
                 $initialMarbles += 10;
             }
         }
