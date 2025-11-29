@@ -3,7 +3,7 @@
  * @var string $title
  * @var string $description
  * @var string $stylesheet
- * @var int $week
+ * @var string $rankingsWeek
  * @var RankedTeam[] $rankings
  * @var string $currentYear
  */
@@ -50,7 +50,7 @@ use App\Rankings\RankedTeam;
             <div class="mt-8 px-4 sm:px-6 lg:px-8">
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
-                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Rankings After Week <?=$week?></h1>
+                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white"><?=$rankingsWeek?> Rankings</h1>
                     </div>
                 </div>
                 <div class="mt-6 flow-root">

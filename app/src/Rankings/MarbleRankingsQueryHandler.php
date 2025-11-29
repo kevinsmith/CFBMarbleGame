@@ -27,12 +27,12 @@ final readonly class MarbleRankingsQueryHandler
         $teams = $this->teamRepository->getTeams();
         $games = $this->gameRepository->getGames();
 
-        $mostRecentCompleteWeek = $this->marbleOrchestrator->determineMostRecentCompleteWeek($games);
+        $latestWeekWithRankings = 1 + $this->marbleOrchestrator->determineMostRecentWeekWithAllGamesCompleted($games);
 
         if ($week === null) {
-            $week = $mostRecentCompleteWeek;
-        } elseif ($week > $mostRecentCompleteWeek) {
-            throw new InvalidArgumentException('Given week cannot be more recent than the most recent complete week.');
+            $week = $latestWeekWithRankings;
+        } elseif ($week > $latestWeekWithRankings) {
+            throw new InvalidArgumentException('Rankings not yet available for week ' . $week . '.');
         }
 
         $rankings = array_map(

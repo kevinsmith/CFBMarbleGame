@@ -33,6 +33,14 @@ final readonly class Home
 
         [$week, $rankings] = $this->queryHandler->getRankings();
 
+        if ($week < 2) {
+            $rankingsWeek = 'Preseason';
+        } elseif ($week === 17) {
+            $rankingsWeek = 'Final';
+        } else {
+            $rankingsWeek = 'Week ' . $week;
+        }
+
         ob_start();
         include __DIR__ . '/HomeTemplate.html.php';
         $html = ob_get_clean();

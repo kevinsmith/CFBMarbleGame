@@ -37,7 +37,7 @@ final readonly class MarbleOrchestrator
             $this->doleOutInitialMarbles($team, $games);
         }
 
-        foreach ($this->gamesThroughWeek($week, $games) as $game) {
+        foreach ($this->gamesUntilWeek($week, $games) as $game) {
             $this->awardMarbles($game);
         }
 
@@ -47,7 +47,7 @@ final readonly class MarbleOrchestrator
     }
 
     /** @param Game[] $games */
-    public function determineMostRecentCompleteWeek(array $games): int
+    public function determineMostRecentWeekWithAllGamesCompleted(array $games): int
     {
         $gamesByWeek = [];
 
@@ -145,12 +145,12 @@ final readonly class MarbleOrchestrator
      *
      * @return Game[]
      */
-    private function gamesThroughWeek(int $week, array $games): array
+    private function gamesUntilWeek(int $week, array $games): array
     {
         $gamesByWeek = [];
 
         foreach ($games as $game) {
-            if ($game->weekNumber <= $week) {
+            if ($game->weekNumber < $week) {
                 $gamesByWeek[$game->weekNumber][] = $game;
             }
         }
