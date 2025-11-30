@@ -84,6 +84,11 @@ final readonly class MarbleOrchestrator
             Conference::SEC,
         ];
 
+        // Filter out conference championships
+        $games = array_filter($games, static function (Game $game): bool {
+            return $game->weekNumber !== 15;
+        });
+
         foreach ($this->getOpponents($team, $games) as $opponent) {
             // Add 10 marbles if opponent is a power conference team
             if (in_array($opponent->conference, $powerConferences, true)) {
