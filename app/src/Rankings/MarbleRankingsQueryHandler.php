@@ -21,7 +21,7 @@ final readonly class MarbleRankingsQueryHandler
     ) {
     }
 
-    /** @return array{0: int|null, 1: array<RankedTeam>} */
+    /** @return array{0: int, 1: int, 2: array<RankedTeam>} */
     public function getRankings(int|null $week = null): array
     {
         $teams = $this->teamRepository->getTeams();
@@ -48,6 +48,6 @@ final readonly class MarbleRankingsQueryHandler
             $this->marbleOrchestrator->getRankedTeams($week, $teams, $games),
         );
 
-        return [$week, $rankings];
+        return [$week, $latestWeekWithRankings, $rankings];
     }
 }

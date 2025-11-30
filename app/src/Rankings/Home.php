@@ -37,18 +37,12 @@ final readonly class Home
         try {
             $week = $this->parseWeekParam($request);
 
-            [$week, $rankings] = $this->queryHandler->getRankings($week);
+            [$week, $latestRankingsWeek, $rankings] = $this->queryHandler->getRankings($week);
         } catch (InvalidArgumentException) {
             return new Response()->setCode(404);
         }
 
-        if ($week < 2) {
-            $rankingsWeek = 'Preseason';
-        } elseif ($week === 17) {
-            $rankingsWeek = 'Final';
-        } else {
-            $rankingsWeek = 'Week ' . $week;
-        }
+        $weekLabels = $this->generateWeekLabels($latestRankingsWeek);
 
         ob_start();
         include __DIR__ . '/HomeTemplate.html.php';
@@ -88,5 +82,23 @@ final readonly class Home
         }
 
         return $manifest[$stylesheet];
+    }
+
+    /** @return array<int, string> */
+    private function generateWeekLabels(int $latestRankingsWeek): array
+    {
+        $weekLabels = [];
+
+        for ($i = 1; $i <= $latestRankingsWeek; $i++) {
+            if ($i === 1) {
+                $weekLabels[$i] = 'Preseason';
+            } elseif ($i === 17) {
+                $weekLabels[$i] = 'Final';
+            } else {
+                $weekLabels[$i] = 'Week ' . $i;
+            }
+        }
+
+        return $weekLabels;
     }
 }

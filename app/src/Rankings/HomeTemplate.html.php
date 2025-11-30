@@ -3,9 +3,14 @@
  * @var string $title
  * @var string $description
  * @var string $stylesheet
- * @var string $rankingsWeek
+ * @var int $week
+ * @var array<int, string> $weekLabels
  * @var RankedTeam[] $rankings
  * @var string $currentYear
+ *
+ * phpcs:disable SlevomatCodingStandard.ControlStructures.BlockControlStructureSpacing.IncorrectLinesCountAfterControlStructure
+ * phpcs:disable Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace
+ * phpcs:disable Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore
  */
 
 use App\Rankings\RankedTeam;
@@ -50,7 +55,12 @@ use App\Rankings\RankedTeam;
             <div class="mt-8 px-4 sm:px-6 lg:px-8">
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
-                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white"><?=$rankingsWeek?> Rankings</h1>
+                        <h1 class="inline-block mr-3 text-xl font-semibold text-gray-900 dark:text-white">Rankings</h1>
+                        <select class="inline-block" onchange="if (this.value) window.location.href = this.value;">
+                            <?php foreach ($weekLabels as $weekNumber => $weekLabel) : ?>
+                            <option value="/?week=<?=$weekNumber?>" <?php if ($weekNumber === $week) : ?>selected<?php endif; ?>><?=$weekLabel?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                 </div>
                 <div class="mt-6 flow-root">
@@ -74,9 +84,7 @@ use App\Rankings\RankedTeam;
                                             <td class="p-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"><?=$team->marbleCount?></td>
                                             <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pr-0 dark:text-gray-300"><?=$team->conference?></td>
                                         </tr>
-                                    <?php endforeach;
-
-                                    ?>
+                                    <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>
