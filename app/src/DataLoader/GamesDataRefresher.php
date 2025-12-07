@@ -110,6 +110,7 @@ final readonly class GamesDataRefresher
                 RequestOptions::QUERY => [
                     'year' => '2025',
                     'classification' => 'fbs',
+                    'seasonType' => 'regular',
                 ],
             ],
         )->getBody()->getContents();
