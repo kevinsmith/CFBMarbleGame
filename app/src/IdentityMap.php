@@ -66,9 +66,7 @@ final class IdentityMap
     private function normalizeKey(mixed $key): string
     {
         if (is_object($key)) {
-            // @phpstan-ignore function.alreadyNarrowedType
             if (method_exists($key, '__toString')) {
-                // @phpstan-ignore cast.string
                 return (string) $key;
             }
 

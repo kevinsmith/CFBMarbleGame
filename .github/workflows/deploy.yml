@@ -104,25 +104,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build PHP_CodeSniffer image
-        uses: docker/build-push-action@v6
+      - uses: ./.github/actions/install-composer-deps
         with:
-          context: .
-          file: docker/app/Dockerfile
-          target: php_codesniffer
-          load: true
-          cache-from: |
-            type=gha,scope=${{ github.ref_name }}-phpcs
-            type=gha
-          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-phpcs
+          php-version: 8.4
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: ./app
 
       - name: Run PHP_CodeSniffer with Doctrine Coding Standard
-        run: |
-          touch playwright/.env # To avoid missing file error
-          make phpcs
+        run: cd app && vendor/bin/phpcs
 
   phpstan:
     runs-on: ubuntu-24.04
@@ -136,9 +125,7 @@ jobs:
           working-directory: ./app
 
       - name: Run PHPStan
-        run: |
-          touch playwright/.env # To avoid missing file error
-          make phpstan
+        run: cd app && vendor/bin/phpstan
 
   phpunit:
     runs-on: ubuntu-24.04
@@ -151,25 +138,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: ./app
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build PHPUnit image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/app/Dockerfile
-          target: phpunit
-          load: true
-          cache-from: |
-            type=gha,scope=${{ github.ref_name }}-phpunit
-            type=gha
-          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}-phpunit
-
       - name: Run PHPUnit
-        run: |
-          touch playwright/.env # To avoid missing file error
-          make phpunit
+        run: cd app && vendor/bin/phpunit
 
   build:
     runs-on: ubuntu-24.04

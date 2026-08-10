@@ -1,52 +1,35 @@
-NODE_AVAILABLE := $(shell command -v node 2> /dev/null)
-
 PHP_CONTAINER := $(shell docker compose ps -q web)
 PHP_RUN := docker exec -it $(PHP_CONTAINER)
+COMPOSE_RUN := docker compose run --rm -T
 
 console:
 	$(PHP_RUN) ./console $(command)
-
-build_tools:
-	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml build
 
 hadolint:
 	docker run --rm -i -v $(shell pwd)/.hadolint.yaml:/.hadolint.yaml hadolint/hadolint < $(shell pwd)/docker/app/Dockerfile
 
 phpcbf:
-	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpcbf
+	$(COMPOSE_RUN) --entrypoint vendor/bin/phpcbf web
 
 phpcs:
-	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpcs
+	$(COMPOSE_RUN) --entrypoint vendor/bin/phpcs web
 
 phpstan:
-	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpstan
+	$(COMPOSE_RUN) --entrypoint vendor/bin/phpstan web
 
 quality: hadolint phpcbf phpcs phpstan
 
 phpunit:
-	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --rm phpunit
+	$(COMPOSE_RUN) --entrypoint vendor/bin/phpunit web
 
 playwright-install:
-	touch playwright/.env
-ifdef NODE_AVAILABLE
 	cd playwright && npm ci
-else
-	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --service-ports --rm playwright npm --no-update-notifier ci
-endif
 
 playwright-test:
-ifdef NODE_AVAILABLE
 	cd playwright && PW_BASE_URL=https://cfbmarblegame.test npx playwright test
-else
-	PW_BASE_URL=https://cfbmarblegame.test docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --service-ports --rm playwright npx --no-update-notifier playwright test
-endif
 
 playwright-report:
-ifdef NODE_AVAILABLE
 	cd playwright && npx playwright show-report
-else
-	docker compose -p cfbmarblegame-tools -f docker-compose.tools.yml run --service-ports --rm playwright npx --no-update-notifier playwright show-report --host 0.0.0.0
-endif
 
 migrate:
 	$(PHP_RUN) composer phinx migrate

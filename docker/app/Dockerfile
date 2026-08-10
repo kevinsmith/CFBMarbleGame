@@ -156,22 +156,3 @@ COPY --from=tailwind /build/dist/asset-manifest.json ./dist/
 COPY --from=tailwind /build/public/styles.*.css ./public/
 
 ENTRYPOINT ["/init"]
-
-FROM prod AS php_codesniffer
-
-ENV PATH="/root/.composer/vendor/bin:${PATH}"
-
-# Coding standards must be installed with relative paths to work from inside the container and for IDEs
-RUN composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false \
-    && composer global require doctrine/coding-standard:^12.0 \
-    && phpcs --config-set installed_paths ../../doctrine/coding-standard/lib,../../slevomat/coding-standard
-
-ENTRYPOINT ["phpcs"]
-
-FROM prod AS phpunit
-
-ENV PATH="/root/.composer/vendor/bin:${PATH}"
-
-RUN composer global require phpunit/phpunit:^11.5
-
-ENTRYPOINT ["phpunit"]
