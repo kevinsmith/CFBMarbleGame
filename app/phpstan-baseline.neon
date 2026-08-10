@@ -1,0 +1,247 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^App\\DataLoader\\DataRefreshCommand should not depend on PDO$#'
+			identifier: phpat.testLayerBoundaries5
+			count: 1
+			path: src/DataLoader/DataRefreshCommand.php
+
+		-
+			message: '#^App\\DataLoader\\DataRefreshCommand should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers0
+			count: 1
+			path: src/DataLoader/DataRefreshCommand.php
+
+		-
+			message: '#^App\\DataLoader\\GamesDataRefresher should not depend on App\\DateFormat$#'
+			identifier: phpat.testModuleBoundaries0
+			count: 2
+			path: src/DataLoader/GamesDataRefresher.php
+
+		-
+			message: '#^App\\DataLoader\\GamesDataRefresher should not depend on App\\Rankings\\Games\\Winner$#'
+			identifier: phpat.testModuleBoundaries0
+			count: 3
+			path: src/DataLoader/GamesDataRefresher.php
+
+		-
+			message: '#^App\\DataLoader\\GamesDataRefresher should not depend on App\\Rankings\\Teams\\Conference$#'
+			identifier: phpat.testModuleBoundaries0
+			count: 4
+			path: src/DataLoader/GamesDataRefresher.php
+
+		-
+			message: '#^App\\DataLoader\\GamesDataRefresher should not depend on App\\Rankings\\Teams\\Subdivision$#'
+			identifier: phpat.testModuleBoundaries0
+			count: 4
+			path: src/DataLoader/GamesDataRefresher.php
+
+		-
+			message: '#^App\\DataLoader\\GamesDataRefresher should not depend on PDO$#'
+			identifier: phpat.testLayerBoundaries5
+			count: 2
+			path: src/DataLoader/GamesDataRefresher.php
+
+		-
+			message: '#^App\\DataLoader\\GamesDataRefresher should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers0
+			count: 1
+			path: src/DataLoader/GamesDataRefresher.php
+
+		-
+			message: '#^App\\HttpServer\\Errors\\MethodNotAllowed should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/Errors/MethodNotAllowed.php
+
+		-
+			message: '#^App\\HttpServer\\Errors\\NotFound should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/Errors/NotFound.php
+
+		-
+			message: '#^App\\HttpServer\\FrontController should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/FrontController.php
+
+		-
+			message: '#^App\\HttpServer\\RequestHandler should not depend on DI\\Container$#'
+			identifier: phpat.testNoContainerInModules
+			count: 1
+			path: src/HttpServer/RequestHandler.php
+
+		-
+			message: '#^App\\HttpServer\\RequestHandler should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/RequestHandler.php
+
+		-
+			message: '#^App\\HttpServer\\ResponseHandler should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/ResponseHandler.php
+
+		-
+			message: '#^App\\HttpServer\\Routes should not depend on App\\Rankings\\Home$#'
+			identifier: phpat.testModuleBoundaries1
+			count: 1
+			path: src/HttpServer/Routes.php
+
+		-
+			message: '#^App\\HttpServer\\Routes should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/Routes.php
+
+		-
+			message: '#^App\\HttpServer\\TestRoutes\\GetArgsAndQueryParam should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/TestRoutes/GetArgsAndQueryParam.php
+
+		-
+			message: '#^App\\HttpServer\\TestRoutes\\GetOnlyArgs should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/TestRoutes/GetOnlyArgs.php
+
+		-
+			message: '#^App\\HttpServer\\TestRoutes\\GetOnlyQueryParam should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/TestRoutes/GetOnlyQueryParam.php
+
+		-
+			message: '#^App\\HttpServer\\TestRoutes\\GetPlain should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers1
+			count: 1
+			path: src/HttpServer/TestRoutes/GetPlain.php
+
+		-
+			message: '#^App\\Rankings\\Games\\Game should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Games/Game.php
+
+		-
+			message: '#^App\\Rankings\\Games\\GameId should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Games/GameId.php
+
+		-
+			message: '#^App\\Rankings\\Games\\GameRepository should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Games/GameRepository.php
+
+		-
+			message: '#^App\\Rankings\\Games\\SqliteGameRepository should not depend on App\\DateFormat$#'
+			identifier: phpat.testModuleBoundaries2
+			count: 1
+			path: src/Rankings/Games/SqliteGameRepository.php
+
+		-
+			message: '#^App\\Rankings\\Games\\SqliteGameRepository should not depend on PDO$#'
+			identifier: phpat.testLayerBoundaries17
+			count: 2
+			path: src/Rankings/Games/SqliteGameRepository.php
+
+		-
+			message: '#^App\\Rankings\\Games\\SqliteGameRepository should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Games/SqliteGameRepository.php
+
+		-
+			message: '#^App\\Rankings\\Games\\Winner should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Games/Winner.php
+
+		-
+			message: '#^App\\Rankings\\Home should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Home.php
+
+		-
+			message: '#^App\\Rankings\\MarbleOrchestrator should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/MarbleOrchestrator.php
+
+		-
+			message: '#^App\\Rankings\\MarbleRankingsQueryHandler should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/MarbleRankingsQueryHandler.php
+
+		-
+			message: '#^App\\Rankings\\RankedTeam should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/RankedTeam.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\CachedTeamRepository should not depend on App\\IdentityMap$#'
+			identifier: phpat.testModuleBoundaries2
+			count: 2
+			path: src/Rankings/Teams/CachedTeamRepository.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\CachedTeamRepository should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Teams/CachedTeamRepository.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\Conference should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Teams/Conference.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\SqliteTeamRepository should not depend on PDO$#'
+			identifier: phpat.testLayerBoundaries17
+			count: 3
+			path: src/Rankings/Teams/SqliteTeamRepository.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\SqliteTeamRepository should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Teams/SqliteTeamRepository.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\Subdivision should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Teams/Subdivision.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\Team should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Teams/Team.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\TeamId should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Teams/TeamId.php
+
+		-
+			message: '#^App\\Rankings\\Teams\\TeamRepository should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Teams/TeamRepository.php
+
+		-
+			message: '#^Parameter \#1 \$namespace of static method PHPat\\Selector\\SelectorPrimitive\:\:inNamespace\(\) expects non\-empty\-string, string given\.$#'
+			identifier: argument.type
+			count: 5
+			path: tests/Architecture.php

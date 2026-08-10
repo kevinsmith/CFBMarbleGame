@@ -1,8 +1,14 @@
+includes:
+    - phpstan-baseline.neon
 parameters:
     level: max
     paths:
         - public
         - src
+        - tests
     ignoreErrors:
         - identifier: argument.type
           path: src/Container.php
+services:
+    - class: Tests\Architecture
+      tags: [phpat.test]

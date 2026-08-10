@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "221e59b3ea16d641c0800ec636690638",
+    "content-hash": "24eb495e0126149bb6825f1debe50822",
     "packages": [
         {
             "name": "cakephp/chronos",
@@ -2908,6 +2908,111 @@
                 "source": "https://github.com/phar-io/version/tree/3.2.1"
             },
             "time": "2022-02-21T01:04:05+00:00"
+        },
+        {
+            "name": "phpat/phpat",
+            "version": "0.12.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/carlosas/phpat.git",
+                "reference": "5319264270c335f548451209bb0f32b55aa59924"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/carlosas/phpat/zipball/5319264270c335f548451209bb0f32b55aa59924",
+                "reference": "5319264270c335f548451209bb0f32b55aa59924",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "phpstan/phpstan": "^2.1"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.87",
+                "kubawerlos/php-cs-fixer-custom-fixers": "3.32.*",
+                "phpunit/phpunit": "^10.5",
+                "vimeo/psalm": "^6.13"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "helpers.php"
+                ],
+                "psr-4": {
+                    "PHPat\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Carlos Alandete Sastre",
+                    "email": "carlos.alandete@gmail.com"
+                }
+            ],
+            "description": "PHP Architecture Tester",
+            "support": {
+                "issues": "https://github.com/carlosas/phpat/issues",
+                "source": "https://github.com/carlosas/phpat/tree/0.12.4"
+            },
+            "time": "2026-03-17T16:47:43+00:00"
+        },
+        {
+            "name": "phpstan/extension-installer",
+            "version": "1.4.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpstan/extension-installer.git",
+                "reference": "85e90b3942d06b2326fba0403ec24fe912372936"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/extension-installer/zipball/85e90b3942d06b2326fba0403ec24fe912372936",
+                "reference": "85e90b3942d06b2326fba0403ec24fe912372936",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.0",
+                "php": "^7.2 || ^8.0",
+                "phpstan/phpstan": "^1.9.0 || ^2.0"
+            },
+            "require-dev": {
+                "composer/composer": "^2.0",
+                "php-parallel-lint/php-parallel-lint": "^1.2.0",
+                "phpstan/phpstan-strict-rules": "^0.11 || ^0.12 || ^1.0"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "PHPStan\\ExtensionInstaller\\Plugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "PHPStan\\ExtensionInstaller\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Composer plugin for automatic installation of PHPStan extensions",
+            "keywords": [
+                "dev",
+                "static analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/phpstan/extension-installer/issues",
+                "source": "https://github.com/phpstan/extension-installer/tree/1.4.3"
+            },
+            "time": "2024-09-04T20:21:43+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",

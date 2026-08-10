@@ -18,7 +18,8 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
         }
     },
     "autoload": {
@@ -33,6 +34,8 @@
     },
     "require-dev": {
         "doctrine/coding-standard": "^14.0",
+        "phpat/phpat": "^0.12.4",
+        "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^11.5",
         "symfony/var-dumper": "^7.3"
