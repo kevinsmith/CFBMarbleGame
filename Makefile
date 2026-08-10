@@ -19,8 +19,11 @@ phpstan:
 
 quality: hadolint phpcbf phpcs phpstan
 
-phpunit:
+tests:
 	$(COMPOSE_RUN) --entrypoint vendor/bin/phpunit web
+
+tests-unit:
+	$(COMPOSE_RUN) --entrypoint vendor/bin/phpunit web --exclude-group integration
 
 playwright-install:
 	cd playwright && npm ci
