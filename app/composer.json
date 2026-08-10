@@ -26,6 +26,11 @@
             "App\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "require-dev": {
         "doctrine/coding-standard": "^14.0",
         "phpstan/phpstan": "^2.0",

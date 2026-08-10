@@ -21,7 +21,7 @@
          failOnWarning="true">
     <testsuites>
         <testsuite name="App">
-            <directory>src</directory>
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
 
