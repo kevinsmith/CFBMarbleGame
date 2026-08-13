@@ -61,6 +61,12 @@ The split is by **external infrastructure**, not by whether a test touches I/O.
   against the real database. Real database, network,
   or mail dependencies belong here.
 
+## Test helpers
+
+- Fixtures and other test helpers are colocated as close as possible to the tests that use
+  them, not gathered in a dedicated namespace: keep a helper at the nearest common root of the
+  tests that use it, and beside the test file itself when only one uses it.
+
 
 ## Injection style
 
