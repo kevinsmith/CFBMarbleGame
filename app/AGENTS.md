@@ -68,6 +68,13 @@ The split is by **external infrastructure**, not by whether a test touches I/O.
   tests that use it, and beside the test file itself when only one uses it.
 
 
+## Code comments
+
+- Write all comments in ASD-STE100 Simplified Technical English: short
+  declarative sentences, active voice, imperative instructions, and one
+  meaning per word. Do not use jargon, idioms, or ambiguous wording.
+
+
 ## Injection style
 
 - Container-managed dependencies are **constructor-injected**: request-scoped
