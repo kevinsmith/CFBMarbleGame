@@ -45,6 +45,11 @@ final class Team
 
     public function setMarbleRank(int $rank): void
     {
+        // BUG: this guard does not match the ranking rules.
+        // Standard competition ranking starts at 1.
+        // A rank of 0 is not valid, but this guard accepts 0.
+        // Do not fix this bug until the characterization test suite is
+        // complete.
         if ($rank < 0) {
             throw new InvalidArgumentException('Rank cannot be negative');
         }
