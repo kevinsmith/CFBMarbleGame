@@ -28,7 +28,7 @@ tests-unit:
 playwright-install:
 	cd playwright && npm ci
 
-playwright-test:
+playwright-tests:
 	cd playwright && PW_BASE_URL=https://cfbmarblegame.test npx playwright test
 
 playwright-report:
