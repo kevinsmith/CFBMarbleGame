@@ -20,6 +20,11 @@ final class CachedTeamRepository implements TeamRepository
     /** @inheritDoc */
     public function getTeams(): array
     {
+        // BUG: this check treats any cached team as a full load.
+        // After getTeam(), getTeams() does not load the remaining teams.
+        // An empty getTeams() result is never cached.
+        // Do not fix this bug until the characterization test suite is
+        // complete.
         if ($this->identityMap->count() === 0) {
             $teams = $this->repository->getTeams();
 
