@@ -10,7 +10,7 @@ After every code change, run the full suite of linters and tests and fix any iss
 
 - make quality
 - make tests
-- make playwright-test
+- PLAYWRIGHT_HTML_OPEN=never make playwright-test
 
 Note that the makefile is full of all kinds of dev tools that you might need, like the above commands, so check its capabilities before constructing custom commands.
 
