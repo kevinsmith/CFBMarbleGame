@@ -1,0 +1,90 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\DataLoader;
+
+use App\DataLoader\DataRefreshCommand;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use PDO;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Tester\CommandTester;
+use Tests\SqliteTestDatabase;
+
+use function json_encode;
+
+use const JSON_THROW_ON_ERROR;
+
+#[CoversClass(DataRefreshCommand::class)]
+final class DataRefreshCommandTest extends TestCase
+{
+    public function testSuccessfulRefreshReturnsSuccess(): void
+    {
+        $pdo = SqliteTestDatabase::pdo();
+        $tester = $this->makeTester([self::cfbdGame()], $pdo);
+
+        $status = $tester->execute([]);
+        $count = $pdo->query('SELECT COUNT(*) AS count FROM games');
+        self::assertNotFalse($count);
+        $row = $count->fetch(PDO::FETCH_ASSOC);
+        self::assertIsArray($row);
+        self::assertSame(1, $row['count']);
+
+        self::assertSame(Command::SUCCESS, $status);
+    }
+
+    public function testFailedRefreshReturnsFailureAndPrintsTheError(): void
+    {
+        $tester = $this->makeTester(
+            [self::cfbdGame(['startDate' => 'not-a-date'])],
+            SqliteTestDatabase::pdo(),
+        );
+
+        $status = $tester->execute([]);
+
+        self::assertSame(Command::FAILURE, $status);
+        self::assertStringContainsString('Error: Failed to parse game date: not-a-date', $tester->getDisplay());
+    }
+
+    /**
+    /**
+     *
+     * @param array<string, mixed> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private static function cfbdGame(array $overrides = []): array
+    {
+        return $overrides + [
+            'id' => 401000001,
+            'startDate' => '2025-09-06T19:00:00.000Z',
+            'week' => 1,
+            'neutralSite' => false,
+            'homeId' => 251,
+            'homeTeam' => 'Texas',
+            'homeClassification' => 'fbs',
+            'homeConference' => 'SEC',
+            'homePoints' => 28,
+            'awayId' => 201,
+            'awayTeam' => 'Oklahoma',
+            'awayClassification' => 'fbs',
+            'awayConference' => 'Big 12',
+            'awayPoints' => 14,
+        ];
+    }
+
+    /** @param list<array<string, mixed>> $games */
+    private function makeTester(array $games, PDO $pdo): CommandTester
+    {
+        $stack = HandlerStack::create(new MockHandler([
+            new Response(200, [], json_encode($games, JSON_THROW_ON_ERROR)),
+        ]));
+
+        return new CommandTester(new DataRefreshCommand(new Client(['handler' => $stack]), $pdo));
+    }
+}
