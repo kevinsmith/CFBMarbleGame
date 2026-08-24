@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Rankings;
+namespace Tests;
 
 use PDO;
 use Phinx\Config\Config;
@@ -26,7 +26,7 @@ final class SqliteTestDatabase
     {
         $config = new Config([
             'paths' => [
-                'migrations' => dirname(__DIR__, 2) . '/config/phinx/migrations',
+                'migrations' => dirname(__DIR__) . '/config/phinx/migrations',
             ],
             'environments' => [
                 'default_migration_table' => 'phinxlog',

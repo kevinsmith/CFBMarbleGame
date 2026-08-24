@@ -13,7 +13,7 @@ use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Tests\Rankings\SqliteTestDatabase;
+use Tests\SqliteTestDatabase;
 
 #[CoversClass(SqliteGameRepository::class)]
 final class SqliteGameRepositoryTest extends TestCase
