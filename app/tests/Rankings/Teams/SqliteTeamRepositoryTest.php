@@ -9,15 +9,10 @@ use App\Rankings\Teams\SqliteTeamRepository;
 use App\Rankings\Teams\Subdivision;
 use App\Rankings\Teams\TeamId;
 use PDO;
-use Phinx\Config\Config;
-use Phinx\Migration\Manager;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Symfony\Component\Console\Input\StringInput;
-use Symfony\Component\Console\Output\NullOutput;
-
-use function dirname;
+use Tests\Rankings\SqliteTestDatabase;
 
 #[CoversClass(SqliteTeamRepository::class)]
 final class SqliteTeamRepositoryTest extends TestCase
@@ -28,29 +23,8 @@ final class SqliteTeamRepositoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->pdo = new PDO('sqlite::memory:');
-        self::migrate($this->pdo);
+        $this->pdo = SqliteTestDatabase::pdo();
         $this->repository = new SqliteTeamRepository($this->pdo);
-    }
-
-    private static function migrate(PDO $pdo): void
-    {
-        $config = new Config([
-            'paths' => [
-                'migrations' => dirname(__DIR__, 3) . '/config/phinx/migrations',
-            ],
-            'environments' => [
-                'default_migration_table' => 'phinxlog',
-                'test' => [
-                    'connection' => $pdo,
-                    'name' => ':memory:',
-                ],
-            ],
-            'version_order' => 'creation',
-        ]);
-
-        $manager = new Manager($config, new StringInput(''), new NullOutput());
-        $manager->migrate('test');
     }
 
     public function testGetTeamsReturnsAnEmptyListWhenThereAreNoTeams(): void
