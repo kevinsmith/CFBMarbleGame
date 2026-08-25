@@ -5,25 +5,19 @@ declare(strict_types=1);
 namespace App\Rankings;
 
 use InvalidArgumentException;
-use RuntimeException;
 use Sapien\Request;
 use Sapien\Response;
 
 use function ctype_digit;
 use function date;
-use function dirname;
-use function file_exists;
-use function file_get_contents;
-use function json_decode;
 use function ob_get_clean;
 use function ob_start;
-
-use const JSON_THROW_ON_ERROR;
 
 final readonly class Home
 {
     public function __construct(
         private MarbleRankingsQueryHandler $queryHandler,
+        private string $stylesheet,
     ) {
     }
 
@@ -31,7 +25,7 @@ final readonly class Home
     {
         $title = 'College Football Marble Game';
         $description = 'Simple Rules for a Complex Season';
-        $stylesheet = $this->getStylesheetFilename('styles.css');
+        $stylesheet = $this->stylesheet;
         $currentYear = date('Y');
 
         try {
@@ -64,24 +58,6 @@ final readonly class Home
         }
 
         throw new InvalidArgumentException('Invalid week parameter');
-    }
-
-    private function getStylesheetFilename(string $stylesheet, string $manifestPath = 'dist/asset-manifest.json'): string
-    {
-        $manifestPath = dirname(__DIR__, 2) . '/' . $manifestPath;
-
-        if (! file_exists($manifestPath)) {
-            throw new RuntimeException('Manifest file not found at ' . $manifestPath);
-        }
-
-        /** @var string[] $manifest */
-        $manifest = json_decode(file_get_contents($manifestPath) ?: '', true, flags: JSON_THROW_ON_ERROR);
-
-        if (! isset($manifest[$stylesheet])) {
-            throw new RuntimeException('Unknown stylesheet ' . $stylesheet);
-        }
-
-        return $manifest[$stylesheet];
     }
 
     /** @return array<int, string> */

@@ -35,6 +35,7 @@ final class HomeTest extends TestCase
                 new SqliteGameRepository($this->pdo, $teams),
                 new MarbleOrchestrator(new NullLogger()),
             ),
+            'styles.test.css',
         );
     }
 

@@ -8,7 +8,9 @@ use App\DataLoader\DataRefreshCommand;
 use App\HttpServer\Routes;
 use App\Rankings\Games\GameRepository;
 use App\Rankings\Games\SqliteGameRepository;
+use App\Rankings\Home;
 use App\Rankings\MarbleOrchestrator;
+use App\Rankings\MarbleRankingsQueryHandler;
 use App\Rankings\Teams\CachedTeamRepository;
 use App\Rankings\Teams\SqliteTeamRepository;
 use App\Rankings\Teams\TeamRepository;
@@ -24,6 +26,7 @@ use PDO;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 
+use function assert;
 use function FastRoute\simpleDispatcher;
 use function file_exists;
 use function file_get_contents;
@@ -92,6 +95,18 @@ final readonly class Container
             },
             MarbleOrchestrator::class => static function (ContainerInterface $c) {
                 return new MarbleOrchestrator($c->get(Logger::class));
+            },
+            Home::class => static function (ContainerInterface $c) {
+                $manifest = $c->get(AssetManifest::class);
+                assert($manifest instanceof AssetManifest);
+
+                return new Home(
+                    $c->get(MarbleRankingsQueryHandler::class),
+                    $manifest->stylesheet('styles.css'),
+                );
+            },
+            AssetManifest::class => static function () {
+                return new AssetManifest(__DIR__ . '/../dist/asset-manifest.json');
             },
         ];
     }
