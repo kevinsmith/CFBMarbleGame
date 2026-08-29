@@ -27,7 +27,7 @@ final readonly class MarbleRankingsQueryHandler
         $teams = $this->teamRepository->getTeams();
         $games = $this->gameRepository->getGames();
 
-        $latestWeekWithRankings = 1 + $this->marbleOrchestrator->determineMostRecentWeekWithAllGamesCompleted($games);
+        $latestWeekWithRankings = 1 + $this->marbleOrchestrator->determineMostRecentContiguousCompleteWeek($games);
 
         if ($week === null) {
             $week = $latestWeekWithRankings;

@@ -267,14 +267,14 @@ final class MarbleOrchestratorTest extends TestCase
     }
 
     /** @param Game[] $games */
-    #[DataProvider('provideMostRecentCompleteWeekScenarios')]
-    public function testDetermineMostRecentWeekWithAllGamesCompleted(int $expectedWeek, array $games): void
+    #[DataProvider('provideMostRecentContiguousCompleteWeekScenarios')]
+    public function testDetermineMostRecentContiguousCompleteWeek(int $expectedWeek, array $games): void
     {
-        self::assertSame($expectedWeek, $this->makeOrchestrator()->determineMostRecentWeekWithAllGamesCompleted($games));
+        self::assertSame($expectedWeek, $this->makeOrchestrator()->determineMostRecentContiguousCompleteWeek($games));
     }
 
     /** @return iterable<string, array{0: int, 1: Game[]}> */
-    public static function provideMostRecentCompleteWeekScenarios(): iterable
+    public static function provideMostRecentContiguousCompleteWeekScenarios(): iterable
     {
         $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
         $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
@@ -299,15 +299,8 @@ final class MarbleOrchestratorTest extends TestCase
             ],
         ];
 
-        // BUG: determineMostRecentWeekWithAllGamesCompleted does not enforce
-        // contiguity. It counts a complete week even when an earlier week is
-        // incomplete. The unfinished game from the incomplete week is then
-        // applied and the away team receives the marbles as the fallback
-        // winner. Do not fix this bug until the characterization test suite is
-        // complete. Update the expectation of this scenario when you fix the
-        // bug.
-        yield 'a complete week after an incomplete week is still counted' => [
-            2,
+        yield 'a complete week after an incomplete week is not counted' => [
+            0,
             [
                 TeamGameFactory::game(10, 1, $texas, $oklahoma, null),
                 TeamGameFactory::game(11, 2, $georgia, $lsu, Winner::Home),

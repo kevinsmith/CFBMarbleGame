@@ -46,16 +46,8 @@ final readonly class MarbleOrchestrator
         return $this->applyStandardCompetitionRanking($teams);
     }
 
-    /**
-     * BUG: this method does not enforce contiguity.
-     * It counts a complete week even when an earlier week is incomplete.
-     * As a result, the unfinished (null-winner) game is applied.
-     * The away team receives the marbles as the fallback winner.
-     * Do not fix this bug until the characterization test suite is complete.
-     *
-     * @param Game[] $games
-     */
-    public function determineMostRecentWeekWithAllGamesCompleted(array $games): int
+    /** @param Game[] $games */
+    public function determineMostRecentContiguousCompleteWeek(array $games): int
     {
         $gamesByWeek = [];
 
@@ -68,9 +60,11 @@ final readonly class MarbleOrchestrator
         $mostRecentCompleteWeek = 0;
 
         foreach ($gamesByWeek as $week => $gamesForTheWeek) {
-            if ($this->isWeekComplete($gamesForTheWeek)) {
-                $mostRecentCompleteWeek = $week;
+            if (! $this->isWeekComplete($gamesForTheWeek)) {
+                break;
             }
+
+            $mostRecentCompleteWeek = $week;
         }
 
         return $mostRecentCompleteWeek;
