@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Tests\Rankings;
 
 use App\Rankings\Games\Game;
+use App\Rankings\Games\GameId;
 use App\Rankings\Games\Winner;
 use App\Rankings\MarbleOrchestrator;
 use App\Rankings\Teams\Conference;
 use App\Rankings\Teams\Subdivision;
 use App\Rankings\Teams\Team;
+use App\Rankings\Teams\TeamId;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
@@ -19,6 +22,10 @@ use function array_map;
 use function array_values;
 
 #[CoversClass(MarbleOrchestrator::class)]
+#[UsesClass(Game::class)]
+#[UsesClass(GameId::class)]
+#[UsesClass(Team::class)]
+#[UsesClass(TeamId::class)]
 final class MarbleOrchestratorTest extends TestCase
 {
     private function makeOrchestrator(): MarbleOrchestrator

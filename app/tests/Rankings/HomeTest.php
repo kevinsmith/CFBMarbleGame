@@ -4,14 +4,23 @@ declare(strict_types=1);
 
 namespace Tests\Rankings;
 
+use App\IdentityMap;
+use App\Rankings\Games\Game;
+use App\Rankings\Games\GameId;
 use App\Rankings\Games\SqliteGameRepository;
 use App\Rankings\Home;
 use App\Rankings\MarbleOrchestrator;
 use App\Rankings\MarbleRankingsQueryHandler;
+use App\Rankings\RankedTeam;
 use App\Rankings\Teams\CachedTeamRepository;
+use App\Rankings\Teams\Conference;
 use App\Rankings\Teams\SqliteTeamRepository;
+use App\Rankings\Teams\Subdivision;
+use App\Rankings\Teams\Team;
+use App\Rankings\Teams\TeamId;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Sapien\Request;
@@ -19,6 +28,19 @@ use Sapien\Response;
 use Tests\SqliteTestDatabase;
 
 #[CoversClass(Home::class)]
+#[UsesClass(CachedTeamRepository::class)]
+#[UsesClass(Conference::class)]
+#[UsesClass(Game::class)]
+#[UsesClass(GameId::class)]
+#[UsesClass(IdentityMap::class)]
+#[UsesClass(MarbleOrchestrator::class)]
+#[UsesClass(MarbleRankingsQueryHandler::class)]
+#[UsesClass(RankedTeam::class)]
+#[UsesClass(SqliteGameRepository::class)]
+#[UsesClass(SqliteTeamRepository::class)]
+#[UsesClass(Subdivision::class)]
+#[UsesClass(Team::class)]
+#[UsesClass(TeamId::class)]
 final class HomeTest extends TestCase
 {
     private PDO $pdo;

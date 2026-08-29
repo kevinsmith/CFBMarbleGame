@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Rankings;
 
 use App\Rankings\Games\Game;
+use App\Rankings\Games\GameId;
 use App\Rankings\Games\GameRepository;
 use App\Rankings\Games\Winner;
 use App\Rankings\MarbleOrchestrator;
@@ -17,11 +18,18 @@ use App\Rankings\Teams\TeamId;
 use App\Rankings\Teams\TeamRepository;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use RuntimeException;
 
 #[CoversClass(MarbleRankingsQueryHandler::class)]
+#[UsesClass(Game::class)]
+#[UsesClass(GameId::class)]
+#[UsesClass(MarbleOrchestrator::class)]
+#[UsesClass(RankedTeam::class)]
+#[UsesClass(Team::class)]
+#[UsesClass(TeamId::class)]
 final class MarbleRankingsQueryHandlerTest extends TestCase
 {
     public function testDefaultWeekIsOnePastTheMostRecentCompleteWeek(): void

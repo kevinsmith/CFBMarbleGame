@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Tests\DataLoader;
 
 use App\DataLoader\DataRefreshCommand;
+use App\DataLoader\GamesDataRefresher;
+use App\Rankings\Teams\Conference;
+use App\Rankings\Teams\Subdivision;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -21,6 +25,9 @@ use function json_encode;
 use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(DataRefreshCommand::class)]
+#[UsesClass(Conference::class)]
+#[UsesClass(GamesDataRefresher::class)]
+#[UsesClass(Subdivision::class)]
 final class DataRefreshCommandTest extends TestCase
 {
     public function testSuccessfulRefreshReturnsSuccess(): void

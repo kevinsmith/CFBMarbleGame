@@ -20,10 +20,10 @@ phpstan:
 quality: hadolint phpcbf phpcs phpstan
 
 tests:
-	$(COMPOSE_RUN) --entrypoint vendor/bin/phpunit web
+	$(COMPOSE_RUN) --env XDEBUG_MODE=coverage --entrypoint bash web -lc 'enable-xdebug && rm -rf tests/_coverage && vendor/bin/phpunit'
 
 tests-unit:
-	$(COMPOSE_RUN) --entrypoint vendor/bin/phpunit web --exclude-group integration
+	$(COMPOSE_RUN) --env XDEBUG_MODE=coverage --entrypoint bash web -lc 'enable-xdebug && rm -rf tests/_coverage && vendor/bin/phpunit --exclude-group integration'
 
 playwright-install:
 	cd playwright && npm ci

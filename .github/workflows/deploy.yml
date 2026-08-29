@@ -139,7 +139,7 @@ jobs:
           working-directory: ./app
 
       - name: Run PHPUnit
-        run: cd app && vendor/bin/phpunit
+        run: cd app && vendor/bin/phpunit --no-coverage
 
   build:
     runs-on: ubuntu-24.04

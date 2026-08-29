@@ -7,14 +7,20 @@ namespace Tests\Rankings\Teams;
 use App\Rankings\Teams\Conference;
 use App\Rankings\Teams\SqliteTeamRepository;
 use App\Rankings\Teams\Subdivision;
+use App\Rankings\Teams\Team;
 use App\Rankings\Teams\TeamId;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tests\SqliteTestDatabase;
 
 #[CoversClass(SqliteTeamRepository::class)]
+#[UsesClass(Conference::class)]
+#[UsesClass(Subdivision::class)]
+#[UsesClass(Team::class)]
+#[UsesClass(TeamId::class)]
 final class SqliteTeamRepositoryTest extends TestCase
 {
     private PDO $pdo;

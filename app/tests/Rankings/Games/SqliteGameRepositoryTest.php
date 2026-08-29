@@ -5,17 +5,34 @@ declare(strict_types=1);
 namespace Tests\Rankings\Games;
 
 use App\DateFormat;
+use App\IdentityMap;
+use App\Rankings\Games\Game;
+use App\Rankings\Games\GameId;
 use App\Rankings\Games\SqliteGameRepository;
 use App\Rankings\Games\Winner;
 use App\Rankings\Teams\CachedTeamRepository;
+use App\Rankings\Teams\Conference;
 use App\Rankings\Teams\SqliteTeamRepository;
+use App\Rankings\Teams\Subdivision;
+use App\Rankings\Teams\Team;
+use App\Rankings\Teams\TeamId;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tests\SqliteTestDatabase;
 
 #[CoversClass(SqliteGameRepository::class)]
+#[UsesClass(CachedTeamRepository::class)]
+#[UsesClass(Conference::class)]
+#[UsesClass(Game::class)]
+#[UsesClass(GameId::class)]
+#[UsesClass(IdentityMap::class)]
+#[UsesClass(SqliteTeamRepository::class)]
+#[UsesClass(Subdivision::class)]
+#[UsesClass(Team::class)]
+#[UsesClass(TeamId::class)]
 final class SqliteGameRepositoryTest extends TestCase
 {
     private PDO $pdo;

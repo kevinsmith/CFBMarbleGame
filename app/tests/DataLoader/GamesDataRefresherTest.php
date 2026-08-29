@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Tests\DataLoader;
 
 use App\DataLoader\GamesDataRefresher;
+use App\Rankings\Teams\Conference;
+use App\Rankings\Teams\Subdivision;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\NullLogger;
@@ -23,6 +26,8 @@ use function parse_str;
 use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(GamesDataRefresher::class)]
+#[UsesClass(Conference::class)]
+#[UsesClass(Subdivision::class)]
 final class GamesDataRefresherTest extends TestCase
 {
     private PDO $pdo;

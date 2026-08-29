@@ -25,9 +25,19 @@
         </testsuite>
     </testsuites>
 
+    <coverage>
+        <report>
+            <text outputFile="php://stdout" showOnlySummary="true"/>
+            <html outputDirectory="tests/_coverage/"/>
+        </report>
+    </coverage>
+
     <source ignoreIndirectDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
             <directory>src</directory>
         </include>
+        <exclude>
+            <file>src/Rankings/HomeTemplate.html.php</file>
+        </exclude>
     </source>
 </phpunit>

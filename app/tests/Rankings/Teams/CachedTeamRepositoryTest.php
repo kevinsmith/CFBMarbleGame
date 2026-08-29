@@ -4,17 +4,22 @@ declare(strict_types=1);
 
 namespace Tests\Rankings\Teams;
 
+use App\IdentityMap;
 use App\Rankings\Teams\CachedTeamRepository;
 use App\Rankings\Teams\Conference;
 use App\Rankings\Teams\Team;
 use App\Rankings\Teams\TeamId;
 use App\Rankings\Teams\TeamRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Tests\Rankings\TeamGameFactory;
 
 #[CoversClass(CachedTeamRepository::class)]
+#[UsesClass(IdentityMap::class)]
+#[UsesClass(Team::class)]
+#[UsesClass(TeamId::class)]
 final class CachedTeamRepositoryTest extends TestCase
 {
     public function testGetTeamsLoadsFromTheInnerRepositoryWhenTheCacheIsEmpty(): void
