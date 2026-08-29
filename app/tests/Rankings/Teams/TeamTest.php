@@ -79,17 +79,12 @@ final class TeamTest extends TestCase
         self::assertSame(7, $team->getMarbleRank());
     }
 
-    public function testSetMarbleRankAcceptsZero(): void
+    public function testSetMarbleRankRejectsZero(): void
     {
-        // BUG: setMarbleRank accepts 0.
-        // Standard competition ranking starts at 1, so 0 is not a valid rank.
-        // Do not fix this bug until the characterization test suite is
-        // complete. Update this test when you fix the bug.
-        $team = TeamGameFactory::team(1, 'Texas');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Rank must be at least 1');
 
-        $team->setMarbleRank(0);
-
-        self::assertSame(0, $team->getMarbleRank());
+        TeamGameFactory::team(1, 'Texas')->setMarbleRank(0);
     }
 
     public function testSetMarbleRankRejectsNegativeRanks(): void
