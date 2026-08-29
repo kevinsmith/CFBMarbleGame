@@ -37,11 +37,13 @@ final class TeamGameFactory
         Winner|null $winner = null,
         bool $neutralSite = false,
         string $date = '2025-09-01T00:00:00Z',
+        int $season = 2025,
     ): Game {
         return new Game(
             GameId::fromDatabase($id),
             new DateTimeImmutable($date),
             $weekNumber,
+            $season,
             $neutralSite,
             $homeTeam,
             $awayTeam,

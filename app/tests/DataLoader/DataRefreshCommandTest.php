@@ -20,6 +20,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Tests\SqliteTestDatabase;
 
+use function date;
 use function json_encode;
 
 use const JSON_THROW_ON_ERROR;
@@ -43,6 +44,36 @@ final class DataRefreshCommandTest extends TestCase
         self::assertSame(1, $row['count']);
 
         self::assertSame(Command::SUCCESS, $status);
+        $season = $pdo->query('SELECT season FROM games');
+        self::assertNotFalse($season);
+        $seasonRow = $season->fetch(PDO::FETCH_ASSOC);
+        self::assertIsArray($seasonRow);
+        self::assertSame((int) date('Y'), $seasonRow['season']);
+    }
+
+    public function testYearOptionRefreshesThatSeason(): void
+    {
+        $pdo = SqliteTestDatabase::pdo();
+        $tester = $this->makeTester([self::cfbdGame()], $pdo);
+
+        $status = $tester->execute(['--year' => '2025']);
+        $season = $pdo->query('SELECT season FROM games');
+        self::assertNotFalse($season);
+        $row = $season->fetch(PDO::FETCH_ASSOC);
+
+        self::assertSame(Command::SUCCESS, $status);
+        self::assertIsArray($row);
+        self::assertSame(2025, $row['season']);
+    }
+
+    public function testNonNumericYearReturnsFailure(): void
+    {
+        $tester = $this->makeTester([self::cfbdGame()], SqliteTestDatabase::pdo());
+
+        $status = $tester->execute(['--year' => 'abc']);
+
+        self::assertSame(Command::FAILURE, $status);
+        self::assertStringContainsString('Error: Year must be a positive integer.', $tester->getDisplay());
     }
 
     public function testFailedRefreshReturnsFailureAndPrintsTheError(): void
@@ -59,8 +90,6 @@ final class DataRefreshCommandTest extends TestCase
     }
 
     /**
-    /**
-     *
      * @param array<string, mixed> $overrides
      *
      * @return array<string, mixed>

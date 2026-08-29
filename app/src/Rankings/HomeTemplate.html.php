@@ -4,6 +4,8 @@
  * @var string $description
  * @var string $stylesheet
  * @var int $week
+ * @var int $season
+ * @var list<int> $seasons
  * @var array<int, string> $weekLabels
  * @var RankedTeam[] $rankings
  * @var string $currentYear
@@ -56,9 +58,14 @@ use App\Rankings\RankedTeam;
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
                         <h1 class="inline-block mr-3 text-xl font-semibold text-gray-900 dark:text-white">Rankings</h1>
+                        <select class="inline-block mr-3" onchange="if (this.value) window.location.href = this.value;">
+                            <?php foreach ($seasons as $seasonNumber) : ?>
+                            <option value="/?season=<?=$seasonNumber?>" <?php if ($seasonNumber === $season) : ?>selected<?php endif; ?>><?=$seasonNumber?></option>
+                            <?php endforeach; ?>
+                        </select>
                         <select class="inline-block" onchange="if (this.value) window.location.href = this.value;">
                             <?php foreach ($weekLabels as $weekNumber => $weekLabel) : ?>
-                            <option value="/?week=<?=$weekNumber?>" <?php if ($weekNumber === $week) : ?>selected<?php endif; ?>><?=$weekLabel?></option>
+                            <option value="/?season=<?=$season?>&week=<?=$weekNumber?>" <?php if ($weekNumber === $week) : ?>selected<?php endif; ?>><?=$weekLabel?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

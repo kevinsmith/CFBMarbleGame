@@ -29,9 +29,10 @@ final readonly class Home
         $currentYear = date('Y');
 
         try {
+            $season = $this->parseSeasonParam($request);
             $week = $this->parseWeekParam($request);
 
-            [$week, $latestRankingsWeek, $rankings] = $this->queryHandler->getRankings($week);
+            [$week, $latestRankingsWeek, $rankings, $season, $seasons] = $this->queryHandler->getRankings($season, $week);
         } catch (InvalidArgumentException) {
             return new Response()->setCode(404);
         }
@@ -43,6 +44,21 @@ final readonly class Home
         $html = ob_get_clean();
 
         return new Response()->setContent($html);
+    }
+
+    private function parseSeasonParam(Request $request): int|null
+    {
+        $season = $request->query['season'] ?? null;
+
+        if (empty($season)) {
+            return null;
+        }
+
+        if (ctype_digit($season)) {
+            return (int) $season;
+        }
+
+        throw new InvalidArgumentException('Invalid season parameter');
     }
 
     private function parseWeekParam(Request $request): int|null

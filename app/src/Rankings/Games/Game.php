@@ -13,6 +13,7 @@ final readonly class Game
         public GameId $id,
         public DateTimeInterface $date,
         public int $weekNumber,
+        public int $season,
         public bool $neutralSite,
         public Team $homeTeam,
         public Team $awayTeam,

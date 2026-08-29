@@ -50,7 +50,7 @@ final class SqliteGameRepositoryTest extends TestCase
 
     public function testGetGamesReturnsAnEmptyListWhenThereAreNoGames(): void
     {
-        self::assertSame([], $this->repository->getGames());
+        self::assertSame([], $this->repository->getGames(2025));
     }
 
     public function testGetGamesMapsEachRow(): void
@@ -61,10 +61,11 @@ final class SqliteGameRepositoryTest extends TestCase
         $this->insertGame(11, '2025-09-13T16:00:00Z', 2, 1, 2, 1, null);
         $this->insertGame(12, '2025-09-20T19:00:00Z', 3, 0, 1, 2, 'away');
 
-        $games = $this->repository->getGames();
+        $games = $this->repository->getGames(2025);
 
         self::assertCount(3, $games);
         self::assertSame(10, $games[0]->id->id);
+        self::assertSame(2025, $games[0]->season);
         self::assertSame('2025-09-06T19:00:00Z', $games[0]->date->format(DateFormat::SQLITE));
         self::assertSame(1, $games[0]->weekNumber);
         self::assertFalse($games[0]->neutralSite);
@@ -87,7 +88,7 @@ final class SqliteGameRepositoryTest extends TestCase
         $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
         $this->insertGame(10, '2025-09-06T19:00:00Z', 1, 0, 1, 2, 'home');
 
-        $games = $this->repository->getGames();
+        $games = $this->repository->getGames(2025);
         $teams = $this->teamRepository->getTeams();
 
         self::assertSame($teams[0], $games[0]->homeTeam);
@@ -103,7 +104,31 @@ final class SqliteGameRepositoryTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Failed to parse game date: not-a-date');
 
-        $this->repository->getGames();
+        $this->repository->getGames(2025);
+    }
+
+    public function testGetGamesReturnsOnlyGamesForTheRequestedSeason(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
+        $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
+        $this->insertGame(10, '2025-09-06T19:00:00Z', 1, 0, 1, 2, 'home', 2025);
+        $this->insertGame(11, '2026-09-05T19:00:00Z', 1, 0, 1, 2, 'home', 2026);
+
+        $games = $this->repository->getGames(2026);
+
+        self::assertCount(1, $games);
+        self::assertSame(11, $games[0]->id->id);
+        self::assertSame(2026, $games[0]->season);
+    }
+
+    public function testGetSeasonsReturnsDistinctSeasonsInOrder(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
+        $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
+        $this->insertGame(10, '2026-09-05T19:00:00Z', 1, 0, 1, 2, 'home', 2026);
+        $this->insertGame(11, '2025-09-06T19:00:00Z', 1, 0, 1, 2, 'home', 2025);
+
+        self::assertSame([2025, 2026], $this->repository->getSeasons());
     }
 
     private function insertTeam(int $id, string $name, string $subdivision, string $conference): void
@@ -127,15 +152,17 @@ final class SqliteGameRepositoryTest extends TestCase
         int $homeTeamId,
         int $awayTeamId,
         string|null $winner,
+        int $season = 2025,
     ): void {
         $statement = $this->pdo->prepare(
-            'INSERT INTO games (id, date, week_number, neutral_site, home_team_id, away_team_id, winner)
-             VALUES (:id, :date, :week_number, :neutral_site, :home_team_id, :away_team_id, :winner)',
+            'INSERT INTO games (id, date, week_number, season, neutral_site, home_team_id, away_team_id, winner)
+             VALUES (:id, :date, :week_number, :season, :neutral_site, :home_team_id, :away_team_id, :winner)',
         );
         $statement->execute([
             'id' => $id,
             'date' => $date,
             'week_number' => $weekNumber,
+            'season' => $season,
             'neutral_site' => $neutralSite,
             'home_team_id' => $homeTeamId,
             'away_team_id' => $awayTeamId,

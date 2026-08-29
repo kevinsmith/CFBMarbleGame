@@ -11,6 +11,9 @@ use App\Rankings\Teams\TeamRepository;
 use InvalidArgumentException;
 
 use function array_map;
+use function date;
+use function in_array;
+use function max;
 
 final readonly class MarbleRankingsQueryHandler
 {
@@ -21,11 +24,19 @@ final readonly class MarbleRankingsQueryHandler
     ) {
     }
 
-    /** @return array{0: int, 1: int, 2: array<RankedTeam>} */
-    public function getRankings(int|null $week = null): array
+    /** @return array{0: int, 1: int, 2: array<RankedTeam>, 3: int, 4: list<int>} */
+    public function getRankings(int|null $season = null, int|null $week = null): array
     {
         $teams = $this->teamRepository->getTeams();
-        $games = $this->gameRepository->getGames();
+        $seasons = $this->gameRepository->getSeasons();
+
+        if ($season === null) {
+            $season = $seasons === [] ? (int) date('Y') : max($seasons);
+        } elseif ($seasons !== [] && ! in_array($season, $seasons, true)) {
+            throw new InvalidArgumentException('Rankings not yet available for season ' . $season . '.');
+        }
+
+        $games = $this->gameRepository->getGames($season);
 
         $latestWeekWithRankings = 1 + $this->marbleOrchestrator->determineMostRecentContiguousCompleteWeek($games);
 
@@ -48,6 +59,6 @@ final readonly class MarbleRankingsQueryHandler
             $this->marbleOrchestrator->getRankedTeams($week, $teams, $games),
         );
 
-        return [$week, $latestWeekWithRankings, $rankings];
+        return [$week, $latestWeekWithRankings, $rankings, $season, $seasons === [] ? [$season] : $seasons];
     }
 }

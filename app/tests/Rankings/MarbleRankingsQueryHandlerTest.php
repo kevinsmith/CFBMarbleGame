@@ -23,6 +23,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use RuntimeException;
 
+use function array_values;
+
 #[CoversClass(MarbleRankingsQueryHandler::class)]
 #[UsesClass(Game::class)]
 #[UsesClass(GameId::class)]
@@ -78,7 +80,7 @@ final class MarbleRankingsQueryHandlerTest extends TestCase
 
         $handler = $this->makeHandler([$texas, $oklahoma], $games);
 
-        [$week, $latestWeekWithRankings, $rankedTeams] = $handler->getRankings(1);
+        [$week, $latestWeekWithRankings, $rankedTeams] = $handler->getRankings(week: 1);
 
         self::assertSame(1, $week);
         self::assertSame(2, $latestWeekWithRankings);
@@ -99,7 +101,7 @@ final class MarbleRankingsQueryHandlerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Rankings not yet available for week 3.');
 
-        $handler->getRankings(3);
+        $handler->getRankings(week: 3);
     }
 
     public function testTeamsAreMappedToRankedTeams(): void
@@ -129,6 +131,39 @@ final class MarbleRankingsQueryHandlerTest extends TestCase
             ],
             $rankedTeams,
         );
+    }
+
+    public function testUnknownSeasonThrows(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+        $handler = $this->makeHandler(
+            [$texas, $oklahoma],
+            [TeamGameFactory::game(10, 1, $texas, $oklahoma, Winner::Home)],
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Rankings not yet available for season 2026.');
+
+        $handler->getRankings(season: 2026);
+    }
+
+    public function testRankingsUseOnlyGamesFromTheRequestedSeason(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+        $handler = $this->makeHandler(
+            [$texas, $oklahoma],
+            [
+                TeamGameFactory::game(10, 1, $texas, $oklahoma, Winner::Home, season: 2025),
+                TeamGameFactory::game(11, 1, $oklahoma, $texas, Winner::Home, season: 2026),
+            ],
+        );
+
+        [, , $rankedTeams, $season] = $handler->getRankings(season: 2026);
+
+        self::assertSame(2026, $season);
+        self::assertSame(['Oklahoma' => 132, 'Texas' => 88], self::marbleCountsByName($rankedTeams));
     }
 
     /**
@@ -176,9 +211,29 @@ final class MarbleRankingsQueryHandlerTest extends TestCase
             }
 
             /** @return Game[] */
-            public function getGames(): array
+            public function getGames(int $season): array
             {
-                return $this->games;
+                $games = [];
+
+                foreach ($this->games as $game) {
+                    if ($game->season === $season) {
+                        $games[] = $game;
+                    }
+                }
+
+                return $games;
+            }
+
+            /** @return list<int> */
+            public function getSeasons(): array
+            {
+                $seasons = [];
+
+                foreach ($this->games as $game) {
+                    $seasons[$game->season] = $game->season;
+                }
+
+                return array_values($seasons);
             }
         };
     }

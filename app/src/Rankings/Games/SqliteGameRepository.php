@@ -11,6 +11,8 @@ use DateTimeImmutable;
 use PDO;
 use RuntimeException;
 
+use function array_map;
+
 final readonly class SqliteGameRepository implements GameRepository
 {
     public function __construct(
@@ -20,23 +22,25 @@ final readonly class SqliteGameRepository implements GameRepository
     }
 
     /** @inheritDoc */
-    public function getGames(): array
+    public function getGames(int $season): array
     {
-        $query = $this->pdo->query(
-            'SELECT id, date, week_number, neutral_site, home_team_id, away_team_id, winner FROM games',
-            PDO::FETCH_ASSOC,
+        $query = $this->pdo->prepare(
+            'SELECT id, date, week_number, season, neutral_site, home_team_id, away_team_id, winner
+             FROM games WHERE season = :season',
         );
 
         if ($query === false) {
             throw new RuntimeException('Failed to fetch games from database');
         }
 
+        $query->execute(['season' => $season]);
+
         $games = [];
 
         // Load all teams to build up the cache in the team repository
         $this->teamRepository->getTeams();
 
-        /** @var array{id: int, date: string, week_number: int, neutral_site: int, home_team_id: int, away_team_id: int, winner: ?string} $row */
+        /** @var array{id: int, date: string, week_number: int, season: int, neutral_site: int, home_team_id: int, away_team_id: int, winner: ?string} $row */
         foreach ($query as $row) {
             $gameDate = DateTimeImmutable::createFromFormat(DateFormat::SQLITE, $row['date']);
 
@@ -54,6 +58,7 @@ final readonly class SqliteGameRepository implements GameRepository
                 GameId::fromDatabase($row['id']),
                 $gameDate,
                 (int) $row['week_number'],
+                (int) $row['season'],
                 (bool) $row['neutral_site'],
                 $this->teamRepository->getTeam(TeamId::fromDatabase($row['home_team_id'])),
                 $this->teamRepository->getTeam(TeamId::fromDatabase($row['away_team_id'])),
@@ -62,5 +67,20 @@ final readonly class SqliteGameRepository implements GameRepository
         }
 
         return $games;
+    }
+
+    /** @inheritDoc */
+    public function getSeasons(): array
+    {
+        $query = $this->pdo->query('SELECT DISTINCT season FROM games ORDER BY season');
+
+        if ($query === false) {
+            throw new RuntimeException('Failed to fetch seasons from database');
+        }
+
+        /** @var list<int|string> $seasons */
+        $seasons = $query->fetchAll(PDO::FETCH_COLUMN);
+
+        return array_map(static fn (int|string $season): int => (int) $season, $seasons);
     }
 }

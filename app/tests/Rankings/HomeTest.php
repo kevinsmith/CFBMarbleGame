@@ -27,6 +27,8 @@ use Sapien\Request;
 use Sapien\Response;
 use Tests\SqliteTestDatabase;
 
+use function date;
+
 #[CoversClass(Home::class)]
 #[UsesClass(CachedTeamRepository::class)]
 #[UsesClass(Conference::class)]
@@ -68,8 +70,10 @@ final class HomeTest extends TestCase
 
         $html = $this->html(($this->home)($this->request()));
 
+        $year = date('Y');
         self::assertStringContainsString('Preseason', $html);
-        self::assertStringContainsString('value="/?week=1" selected', $html);
+        self::assertStringContainsString('value="/?season=' . $year . '&week=1" selected', $html);
+        self::assertStringContainsString('value="/?season=' . $year . '" selected', $html);
     }
 
     public function testRequestedWeekIsSelectedInTheDropdown(): void
@@ -80,9 +84,9 @@ final class HomeTest extends TestCase
 
         $html = $this->html(($this->home)($this->request(['week' => '1'])));
 
-        self::assertStringContainsString('value="/?week=1" selected', $html);
-        self::assertStringContainsString('value="/?week=2"', $html);
-        self::assertStringNotContainsString('value="/?week=2" selected', $html);
+        self::assertStringContainsString('value="/?season=2025&week=1" selected', $html);
+        self::assertStringContainsString('value="/?season=2025&week=2"', $html);
+        self::assertStringNotContainsString('value="/?season=2025&week=2" selected', $html);
     }
 
     public function testNonNumericWeekReturns404(): void
@@ -109,7 +113,7 @@ final class HomeTest extends TestCase
 
         $html = $this->html(($this->home)($this->request(['week' => '0'])));
 
-        self::assertStringContainsString('value="/?week=1" selected', $html);
+        self::assertStringContainsString('value="/?season=' . date('Y') . '&week=1" selected', $html);
     }
 
     public function testWeekSeventeenIsLabeledFinal(): void
@@ -135,6 +139,24 @@ final class HomeTest extends TestCase
         $html = $this->html(($this->home)($this->request()));
 
         self::assertStringContainsString('South Dakota State*', $html);
+    }
+
+    public function testNonNumericSeasonReturns404(): void
+    {
+        $response = ($this->home)($this->request(['season' => 'abc']));
+
+        self::assertSame(404, $response->getCode());
+    }
+
+    public function testUnknownSeasonReturns404(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
+        $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
+        $this->insertGame(10, 1, 1, 2, 'home');
+
+        $response = ($this->home)($this->request(['season' => '2026']));
+
+        self::assertSame(404, $response->getCode());
     }
 
     /** @param array<string, string> $query */
@@ -167,8 +189,8 @@ final class HomeTest extends TestCase
     private function insertGame(int $id, int $weekNumber, int $homeTeamId, int $awayTeamId, string $winner): void
     {
         $statement = $this->pdo->prepare(
-            'INSERT INTO games (id, date, week_number, neutral_site, home_team_id, away_team_id, winner)
-             VALUES (:id, :date, :week_number, 0, :home_team_id, :away_team_id, :winner)',
+            'INSERT INTO games (id, date, week_number, season, neutral_site, home_team_id, away_team_id, winner)
+             VALUES (:id, :date, :week_number, 2025, 0, :home_team_id, :away_team_id, :winner)',
         );
         $statement->execute([
             'id' => $id,

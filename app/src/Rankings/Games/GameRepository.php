@@ -7,5 +7,8 @@ namespace App\Rankings\Games;
 interface GameRepository
 {
     /** @return Game[] */
-    public function getGames(): array;
+    public function getGames(int $season): array;
+
+    /** @return list<int> */
+    public function getSeasons(): array;
 }

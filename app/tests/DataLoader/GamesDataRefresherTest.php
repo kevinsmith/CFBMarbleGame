@@ -40,9 +40,9 @@ final class GamesDataRefresherTest extends TestCase
         $this->lastRequest = null;
     }
 
-    public function testFetchUsesThe2025RegularSeasonFbsQuery(): void
+    public function testFetchUsesTheRequestedYearRegularSeasonFbsQuery(): void
     {
-        $this->makeRefresher([self::cfbdGame()])->pullAndStoreFreshData();
+        $this->makeRefresher([self::cfbdGame()])->pullAndStoreFreshData(2025);
 
         self::assertInstanceOf(RequestInterface::class, $this->lastRequest);
         $query = [];
@@ -78,11 +78,11 @@ final class GamesDataRefresherTest extends TestCase
                 'awayConference' => 'Big 12',
                 'awayPoints' => 14,
             ]),
-        ])->pullAndStoreFreshData();
+        ])->pullAndStoreFreshData(2025);
 
         $teams = $this->fetchAll('SELECT id, name, subdivision, conference, cfbd_id FROM teams ORDER BY cfbd_id');
         $games = $this->fetchAll(
-            'SELECT date, week_number, neutral_site, home_team_id, away_team_id, winner, cfbd_id FROM games',
+            'SELECT date, week_number, season, neutral_site, home_team_id, away_team_id, winner, cfbd_id FROM games',
         );
 
         self::assertSame('Oklahoma', $teams[0]['name']);
@@ -98,6 +98,7 @@ final class GamesDataRefresherTest extends TestCase
                 [
                     'date' => '2025-09-06T19:00:00Z',
                     'week_number' => 1,
+                    'season' => 2025,
                     'neutral_site' => 0,
                     'home_team_id' => $teams[1]['id'],
                     'away_team_id' => $teams[0]['id'],
@@ -119,7 +120,7 @@ final class GamesDataRefresherTest extends TestCase
                 'awayPoints' => 14,
                 'week' => 1,
             ]),
-        ])->pullAndStoreFreshData();
+        ])->pullAndStoreFreshData(2025);
         $this->makeRefresher([
             self::cfbdGame([
                 'id' => 401000001,
@@ -128,7 +129,7 @@ final class GamesDataRefresherTest extends TestCase
                 'awayPoints' => 17,
                 'week' => 2,
             ]),
-        ])->pullAndStoreFreshData();
+        ])->pullAndStoreFreshData(2025);
 
         $texas = $this->fetchAll("SELECT conference FROM teams WHERE name = 'Texas'");
         $game = $this->fetchAll('SELECT week_number, winner FROM games WHERE cfbd_id = 401000001');
@@ -153,7 +154,7 @@ final class GamesDataRefresherTest extends TestCase
                 'homePoints' => 21,
                 'awayPoints' => 21,
             ]),
-        ])->pullAndStoreFreshData();
+        ])->pullAndStoreFreshData(2025);
 
         $winners = $this->fetchAll('SELECT cfbd_id, winner FROM games ORDER BY cfbd_id');
 
@@ -173,7 +174,7 @@ final class GamesDataRefresherTest extends TestCase
                 'id' => 401000099,
                 'neutralSite' => true,
             ]),
-        ])->pullAndStoreFreshData();
+        ])->pullAndStoreFreshData(2025);
 
         $games = $this->fetchAll('SELECT neutral_site FROM games WHERE cfbd_id = 401000099');
 
@@ -199,7 +200,7 @@ final class GamesDataRefresherTest extends TestCase
             ]);
         }
 
-        $this->makeRefresher($games)->pullAndStoreFreshData();
+        $this->makeRefresher($games)->pullAndStoreFreshData(2025);
 
         $rows = $this->fetchAll('SELECT cfbd_id, neutral_site FROM games ORDER BY cfbd_id');
 
@@ -220,7 +221,7 @@ final class GamesDataRefresherTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Failed to parse game date: not-a-date');
 
-        $this->makeRefresher([self::cfbdGame(['startDate' => 'not-a-date'])])->pullAndStoreFreshData();
+        $this->makeRefresher([self::cfbdGame(['startDate' => 'not-a-date'])])->pullAndStoreFreshData(2025);
     }
 
     /** @return list<array<string, mixed>> */

@@ -10,9 +10,14 @@ use Psr\Log\LogLevel;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
+
+use function ctype_digit;
+use function date;
+use function is_string;
 
 #[AsCommand(
     name: 'data:refresh',
@@ -27,6 +32,17 @@ final class DataRefreshCommand extends Command
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->addOption(
+            'year',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Season year to refresh',
+            (string) date('Y'),
+        );
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $consoleLogger = new ConsoleLogger($output, [
@@ -39,8 +55,16 @@ final class DataRefreshCommand extends Command
             $consoleLogger,
         );
 
+        $year = $input->getOption('year');
+
+        if (! is_string($year) || ! ctype_digit($year)) {
+            $output->writeln('<error>Error: Year must be a positive integer.</error>');
+
+            return Command::FAILURE;
+        }
+
         try {
-            $retriever->pullAndStoreFreshData();
+            $retriever->pullAndStoreFreshData((int) $year);
 
             return Command::SUCCESS;
         } catch (Throwable $e) {

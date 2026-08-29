@@ -82,11 +82,11 @@ final readonly class GamesDataRefresher
     ) {
     }
 
-    public function pullAndStoreFreshData(): void
+    public function pullAndStoreFreshData(int $year): void
     {
         $this->logger->notice('Starting data refresh from the CollegeFootballData.com API...');
 
-        $data = $this->fetchFromCfbdApi();
+        $data = $this->fetchFromCfbdApi($year);
         $this->logger->notice('Successfully fetched data');
 
         [$games, $teams] = $this->extractGamesAndTeams($data);
@@ -96,19 +96,19 @@ final readonly class GamesDataRefresher
 
         $games = $this->applyDataCorrectionsToGames($games);
 
-        $this->saveGames($games);
+        $this->saveGames($games, $year);
 
         $this->logger->notice('Data refresh completed successfully');
     }
 
     /** @return CfbdApiGamesResponse */
-    private function fetchFromCfbdApi(): array
+    private function fetchFromCfbdApi(int $year): array
     {
         $apiResponse = $this->cfbdApiClient->get(
             '/games',
             [
                 RequestOptions::QUERY => [
-                    'year' => '2025',
+                    'year' => (string) $year,
                     'classification' => 'fbs',
                     'seasonType' => 'regular',
                 ],
@@ -237,7 +237,7 @@ final readonly class GamesDataRefresher
     }
 
     /** @param GameArray[] $games */
-    private function saveGames(array $games): void
+    private function saveGames(array $games, int $year): void
     {
         $teamIdMapping = $this->getTeamIdMapping();
 
@@ -245,11 +245,12 @@ final readonly class GamesDataRefresher
             $this->pdo->beginTransaction();
 
             $stmt = $this->pdo->prepare(<<<'SQL'
-            INSERT INTO games (date, week_number, neutral_site, home_team_id, away_team_id, winner, cfbd_id)
-                VALUES (:date, :week_number, :neutral_site, :home_team_id, :away_team_id, :winner, :cfbd_id)
+            INSERT INTO games (date, week_number, season, neutral_site, home_team_id, away_team_id, winner, cfbd_id)
+                VALUES (:date, :week_number, :season, :neutral_site, :home_team_id, :away_team_id, :winner, :cfbd_id)
             ON CONFLICT(cfbd_id) DO UPDATE SET
                 date = :date,
                 week_number = :week_number,
+                season = :season,
                 neutral_site = :neutral_site,
                 home_team_id = :home_team_id,
                 away_team_id = :away_team_id,
@@ -272,6 +273,7 @@ final readonly class GamesDataRefresher
                 $stmt->execute([
                     'date' => $game['date']->format(DateFormat::SQLITE),
                     'week_number' => $game['week_number'],
+                    'season' => $year,
                     'neutral_site' => $game['neutral_site'],
                     'home_team_id' => $homeTeamId,
                     'away_team_id' => $awayTeamId,
