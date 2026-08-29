@@ -91,32 +91,28 @@ final class CachedTeamRepositoryTest extends TestCase
         self::assertSame($texas, $team);
     }
 
-    public function testGetTeamsAfterGetTeamDoesNotLoadTheRemainingTeams(): void
+    public function testGetTeamsAfterGetTeamLoadsTheRemainingTeams(): void
     {
-        // BUG: getTeams() after getTeam() does not load the remaining teams.
-        // The cache count is not zero, so this method skips the inner load.
-        // Do not fix this bug until the characterization test suite is
-        // complete. Update this test when you fix the bug.
         $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
         $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
         $inner = self::makeInnerRepository([$texas, $oklahoma]);
         $repository = new CachedTeamRepository($inner);
 
-        $repository->getTeam(TeamId::fromDatabase(1));
+        $cachedTexas = $repository->getTeam(TeamId::fromDatabase(1));
         $teams = $repository->getTeams();
 
-        self::assertSame(0, $inner->getTeamsCalls);
-        self::assertSame([$texas], $teams);
+        self::assertSame(1, $inner->getTeamsCalls);
+        self::assertSame([$cachedTexas, $oklahoma], $teams);
     }
 
-    public function testGetTeamsWithNoTeamsKeepsCallingTheInnerRepository(): void
+    public function testGetTeamsWithNoTeamsDoesNotCallTheInnerRepositoryAgain(): void
     {
         $inner = self::makeInnerRepository([]);
         $repository = new CachedTeamRepository($inner);
 
         self::assertSame([], $repository->getTeams());
         self::assertSame([], $repository->getTeams());
-        self::assertSame(2, $inner->getTeamsCalls);
+        self::assertSame(1, $inner->getTeamsCalls);
     }
 
     /**

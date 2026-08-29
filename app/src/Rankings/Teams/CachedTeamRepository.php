@@ -11,6 +11,8 @@ final class CachedTeamRepository implements TeamRepository
     /** @var IdentityMap<TeamId, Team> */
     private IdentityMap $identityMap;
 
+    private bool $allTeamsLoaded = false;
+
     public function __construct(
         private readonly TeamRepository $repository,
     ) {
@@ -20,17 +22,14 @@ final class CachedTeamRepository implements TeamRepository
     /** @inheritDoc */
     public function getTeams(): array
     {
-        // BUG: this check treats any cached team as a full load.
-        // After getTeam(), getTeams() does not load the remaining teams.
-        // An empty getTeams() result is never cached.
-        // Do not fix this bug until the characterization test suite is
-        // complete.
-        if ($this->identityMap->count() === 0) {
-            $teams = $this->repository->getTeams();
-
-            foreach ($teams as $team) {
-                $this->identityMap->add($team->id, $team);
+        if (! $this->allTeamsLoaded) {
+            foreach ($this->repository->getTeams() as $team) {
+                if (! $this->identityMap->has($team->id)) {
+                    $this->identityMap->add($team->id, $team);
+                }
             }
+
+            $this->allTeamsLoaded = true;
         }
 
         return $this->identityMap->getAll();
