@@ -123,6 +123,11 @@ final class TeamTest extends TestCase
         self::assertSame(Conference::OVCBigSouth, Conference::fromString('Big South-OVC'));
     }
 
+    public function testConferenceFromStringMapsCoastalAthleticToCaa(): void
+    {
+        self::assertSame(Conference::CAA, Conference::fromString('Coastal Athletic'));
+    }
+
     public function testConferenceFromStringMapsExactNames(): void
     {
         self::assertSame(Conference::SEC, Conference::fromString('SEC'));
