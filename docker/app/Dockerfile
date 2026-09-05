@@ -152,6 +152,8 @@ RUN chmod -R +x /etc/cont-init.d/
 COPY docker/app/services.d /etc/services.d/
 RUN chmod -R +x /etc/services.d/
 
+COPY --chmod=755 docker/app/refresh-loop /usr/local/bin/refresh-loop
+
 COPY --from=tailwind /build/dist/asset-manifest.json ./dist/
 COPY --from=tailwind /build/public/styles.*.css ./public/
 

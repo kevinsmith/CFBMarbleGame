@@ -1,0 +1,45 @@
+#!/bin/sh
+cd /var/www
+
+log() {
+    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"
+}
+
+should_refresh() {
+    now=$(date -u +%s)
+    for start in \
+        2026-09-08T03:30:00Z \
+        2026-09-13T07:59:00Z \
+        2026-09-20T07:00:00Z \
+        2026-09-27T06:30:00Z \
+        2026-10-04T07:59:00Z \
+        2026-10-11T06:30:00Z \
+        2026-10-18T06:30:00Z \
+        2026-10-25T06:00:00Z \
+        2026-11-01T06:30:00Z \
+        2026-11-08T07:30:00Z \
+        2026-11-15T08:59:00Z \
+        2026-11-22T07:30:00Z \
+        2026-11-29T08:00:00Z \
+        2026-12-13T00:00:00Z
+    do
+        start_ts=$(date -u -d "$start" +%s)
+        end_ts=$((start_ts + 86400))
+        if [ "$now" -ge "$start_ts" ] && [ "$now" -lt "$end_ts" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+log "refresh loop started"
+
+while true; do
+    if should_refresh; then
+        log "refresh window open; running data:refresh"
+        ./console data:refresh || log "data:refresh failed"
+    else
+        log "outside refresh window; sleeping"
+    fi
+    sleep 3600
+done

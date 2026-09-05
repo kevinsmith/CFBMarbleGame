@@ -21,6 +21,20 @@ services:
     volumes:
       - cfbmarblegame_data:/var/www/data
 
+  refresh:
+    image: ${REGISTRY}/${APP_IMAGE}:${GIT_SHORT_SHA}
+    entrypoint: ["/usr/local/bin/refresh-loop"]
+    environment:
+      - DB_PATH=/var/www/data/cfbmarblegame.db
+    secrets:
+      - CFBD_API_KEY
+    volumes:
+      - cfbmarblegame_data:/var/www/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
 networks:
   traefik:
     external: true
