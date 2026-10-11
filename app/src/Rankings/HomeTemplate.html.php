@@ -25,11 +25,12 @@ use App\Rankings\RankedTeam;
     <meta name="description" content="<?=$description?>">
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light">
     <link rel="stylesheet" href="/<?=$stylesheet?>">
     <link rel="preconnect" href="https://rsms.me/">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 </head>
-<body>
+<body class="bg-white">
 <div class="mx-auto min-w-xs max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-3xl">
         <main class="py-10">
@@ -57,7 +58,7 @@ use App\Rankings\RankedTeam;
             <div class="mt-8 px-4 sm:px-6 lg:px-8">
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
-                        <h1 class="inline-block mr-3 text-xl font-semibold text-gray-900 dark:text-white">Rankings</h1>
+                        <h1 class="inline-block mr-3 text-xl font-semibold text-gray-900">Rankings</h1>
                         <select class="inline-block mr-3" onchange="if (this.value) window.location.href = this.value;">
                             <?php foreach ($seasons as $seasonNumber) : ?>
                             <option value="/?season=<?=$seasonNumber?>" <?php if ($seasonNumber === $season) : ?>selected<?php endif; ?>><?=$seasonNumber?></option>
@@ -73,31 +74,31 @@ use App\Rankings\RankedTeam;
                 <div class="mt-6 flow-root">
                     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                            <table class="min-w-full divide-y divide-gray-300 dark:divide-white/15">
+                            <table class="min-w-full divide-y divide-gray-300">
                                 <thead>
-                                <tr class="divide-x divide-gray-200 dark:divide-white/10">
-                                    <th scope="col" class="w-px px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Marble Rank</th>
-                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Trend</th>
-                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Team</th>
-                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Marbles</th>
-                                    <th scope="col" class="py-3.5 pr-4 pl-4 text-left text-sm font-semibold text-gray-900 sm:pr-0 dark:text-white">Conference</th>
+                                <tr class="divide-x divide-gray-200">
+                                    <th scope="col" class="w-px px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Marble Rank</th>
+                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Trend</th>
+                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Team</th>
+                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Marbles</th>
+                                    <th scope="col" class="py-3.5 pr-4 pl-4 text-left text-sm font-semibold text-gray-900 sm:pr-0">Conference</th>
                                 </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200 bg-white dark:divide-white/10 dark:bg-gray-900">
+                                <tbody class="divide-y divide-gray-200 bg-white">
                                     <?php foreach ($rankings as $team) : ?>
                                         <?php $teamFootnote = $team->isFCS ? '*' : ''; ?>
-                                        <tr class="divide-x divide-gray-200 dark:divide-white/10">
-                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"><?=$team->marbleRank?></td>
+                                        <tr class="divide-x divide-gray-200">
+                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->marbleRank?></td>
                                             <?php if ($team->rankChange > 0) : ?>
-                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-green-600 dark:text-green-400" title="Up <?=$team->rankChange?> since the previous week">&uarr; <?=$team->rankChange?></td>
+                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-green-600" title="Up <?=$team->rankChange?> since the previous week">&uarr; <?=$team->rankChange?></td>
                                             <?php elseif ($team->rankChange < 0) : ?>
-                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-red-600 dark:text-red-400" title="Down <?=abs($team->rankChange)?> since the previous week">&darr; <?=abs($team->rankChange)?></td>
+                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-red-600" title="Down <?=abs($team->rankChange)?> since the previous week">&darr; <?=abs($team->rankChange)?></td>
                                             <?php else : ?>
-                                            <td class="p-4 text-sm whitespace-nowrap text-gray-400 dark:text-gray-500">&ndash;</td>
+                                            <td class="p-4 text-sm whitespace-nowrap text-gray-400">&ndash;</td>
                                             <?php endif; ?>
-                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white"><?=$team->teamName . $teamFootnote?></td>
-                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"><?=$team->marbleCount?></td>
-                                            <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pr-0 dark:text-gray-300"><?=$team->conference?></td>
+                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900"><?=$team->teamName . $teamFootnote?></td>
+                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->marbleCount?></td>
+                                            <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pr-0"><?=$team->conference?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>

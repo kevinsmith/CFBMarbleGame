@@ -76,6 +76,19 @@ final class HomeTest extends TestCase
         self::assertStringContainsString('value="/?season=' . $year . '" selected', $html);
     }
 
+    public function testPageUsesAWhiteBackgroundInEveryColorScheme(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
+        $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
+        $this->insertGame(10, 1, 1, 2, 'home');
+
+        $html = $this->html(($this->home)($this->request()));
+
+        self::assertStringContainsString('<meta name="color-scheme" content="light">', $html);
+        self::assertStringContainsString('<body class="bg-white">', $html);
+        self::assertStringNotContainsString('dark:', $html);
+    }
+
     public function testRequestedWeekIsSelectedInTheDropdown(): void
     {
         $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
