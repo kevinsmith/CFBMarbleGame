@@ -1,0 +1,15 @@
+services:
+  web:
+    image: cfbmarblegame-orb
+    build:
+      args:
+        DEV_DEPS: "1"
+    env_file: app/.env
+    environment:
+      DEBUG_MODE: "1"
+      LOG_LEVEL: debug
+      ENABLE_XDEBUG: "1"
+    ports:
+      - "9000:80"
+    volumes:
+      - ./app/:/var/www

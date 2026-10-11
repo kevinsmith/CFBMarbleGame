@@ -12,3 +12,5 @@ app/public/styles.*.css
 assets/
 .claude
 app/data/cfbmarblegame.db
+.amp/portals/
+/.env

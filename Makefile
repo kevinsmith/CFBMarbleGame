@@ -29,7 +29,7 @@ playwright-install:
 	cd playwright && npm ci
 
 playwright-tests:
-	cd playwright && PW_BASE_URL=https://cfbmarblegame.test npx playwright test
+	cd playwright && PW_BASE_URL=$${PW_BASE_URL:-https://cfbmarblegame.test} npx playwright test
 
 playwright-report:
 	cd playwright && npx playwright show-report

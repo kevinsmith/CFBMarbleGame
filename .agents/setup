@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+SECONDS=0
+echo "[setup ${SECONDS}s] Prepare Docker and Playwright prerequisites"
+repository_added=0
+if ! grep -qs 'https://download.docker.com/linux/debian' \
+    /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; then
+    sudo install -d -m 755 /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/debian/gpg | sudo tee /etc/apt/keyrings/docker.asc > /dev/null
+    sudo chmod 644 /etc/apt/keyrings/docker.asc
+    # shellcheck disable=SC1091
+    source /etc/os-release
+    printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian %s stable\n' \
+        "$(dpkg --print-architecture)" "$VERSION_CODENAME" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    repository_added=1
+fi
+packages=(docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin shellcheck
+    libasound2 libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcairo2
+    libcups2 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0 libnspr4 libnss3
+    libpango-1.0-0 libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6
+    libxfixes3 libxkbcommon0 libxrandr2 xvfb fonts-noto-color-emoji
+    fonts-unifont libfontconfig1 libfreetype6 xfonts-scalable fonts-liberation
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-tlwg-loma-otf fonts-freefont-ttf)
+missing=()
+for package in "${packages[@]}"; do
+    if [[ "$(dpkg-query -W -f='${Status}' "$package" 2>/dev/null || true)" != 'install ok installed' ]]; then
+        missing+=("$package")
+    fi
+done
+if (( repository_added || ${#missing[@]} )); then
+    sudo apt-get update -qq
+fi
+if (( ${#missing[@]} )); then
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${missing[@]}"
+fi
+
+[[ -f app/.env ]] || cp app/.env.example app/.env
+[[ -f playwright/.env ]] || cp playwright/.env.example playwright/.env
+export COMPOSE_FILE="$PWD/docker-compose.yml:$PWD/docker-compose.orb.yml"
+profile_marker='# CFB Marble Game orb Compose environment'
+if [[ ! -f "$HOME/.bash_profile" ]]; then
+    # shellcheck disable=SC2016
+    printf '[ ! -f "$HOME/.profile" ] || . "$HOME/.profile"\n' > "$HOME/.bash_profile"
+fi
+if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile"; then
+    cat >> "$HOME/.bash_profile" <<EOF
+
+$profile_marker
+if [[ "\$PWD" == "$PWD" || "\$PWD" == "$PWD/"* ]]; then
+    export COMPOSE_FILE="$COMPOSE_FILE"
+    export PW_BASE_URL="\${PW_BASE_URL:-http://localhost:9000}"
+fi
+EOF
+fi
+.agents/resume
+
+echo "[setup ${SECONDS}s] Build the existing app image with development dependencies"
+docker compose build
+docker image inspect hadolint/hadolint > /dev/null 2>&1 || docker pull hadolint/hadolint
+
+echo "[setup ${SECONDS}s] Copy image-built dependencies and assets to the development mount"
+artifacts="$(mktemp -d)"
+trap 'rm -rf "$artifacts"' EXIT
+docker run --rm --entrypoint bash cfbmarblegame-orb -lc \
+    'tar -cf - vendor dist/asset-manifest.json public/styles.*.css' | tar -xf - -C "$artifacts"
+rm -rf app/vendor
+mv "$artifacts/vendor" app/vendor
+rm -f app/public/styles.*.css
+mv "$artifacts/public/"styles.*.css app/public/
+mv "$artifacts/dist/asset-manifest.json" app/dist/
+docker compose run --rm -T --entrypoint composer web phinx migrate --no-interaction
+
+echo "[setup ${SECONDS}s] Prepare Playwright on the orb host"
+(cd playwright && npm ci --no-audit --no-fund && npx playwright install chromium)
+echo "[setup ${SECONDS}s] Ready"

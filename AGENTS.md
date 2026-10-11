@@ -4,6 +4,8 @@ To run CLI commands in the app container, do it like this:
 
   docker exec -it $(docker compose ps -q web) {command}
 
+Run `.agents/test-setup` when changing orb lifecycle scripts.
+
 Always add the appropriate tests (unit or integration) for the given code changes to be included in the same commit.
 
 After every code change, run the full suite of linters and tests and fix any issues that arise:

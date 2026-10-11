@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Keep PHP variables in the container process.
+# shellcheck disable=SC2016
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+root="$PWD"
+config_backup="$(mktemp)"
+had_config=0
+if [[ -f .env ]]; then
+    cp .env "$config_backup"
+    had_config=1
+fi
+trap 'if [[ "$had_config" == 1 ]]; then cp "$config_backup" "$root/.env"; else rm -f "$root/.env"; fi
+    rm -f "$config_backup" "$root/app/public/styles.orb-stale.css"
+    rm -rf "$root/app/vendor/orb-setup-stale-package"' EXIT
+time "$root/.agents/setup"
+printf '%s\n' 'COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml' 'ORB_SETUP_SENTINEL=preserve' > .env
+mkdir app/vendor/orb-setup-stale-package
+printf '%s\n' 'stale package' > app/vendor/orb-setup-stale-package/obsolete.php
+printf '%s\n' 'stale stylesheet' > app/public/styles.orb-stale.css
+before="$(sha256sum .env app/.env playwright/.env app/data/cfbmarblegame.db app/public/index.php)"
+image="$(docker image inspect cfbmarblegame-orb --format '{{json .RootFS.Layers}}')"
+time "$root/.agents/setup"
+time "$root/.agents/resume"
+[[ "$before" == "$(sha256sum .env app/.env playwright/.env app/data/cfbmarblegame.db app/public/index.php)" ]]
+[[ "$image" == "$(docker image inspect cfbmarblegame-orb --format '{{json .RootFS.Layers}}')" ]]
+[[ ! -e app/vendor/orb-setup-stale-package && ! -e app/public/styles.orb-stale.css ]]
+[[ "$(grep -Fxc '# CFB Marble Game orb Compose environment' "$HOME/.bash_profile")" == 1 ]]
+
+# Check the environment in a new login shell, not in the setup process.
+env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin /bin/bash -lc "$(cat <<'CHECKS'
+    set -euo pipefail
+    [[ "$COMPOSE_FILE" == "$PWD/docker-compose.yml:$PWD/docker-compose.orb.yml" ]]
+    [[ "$PW_BASE_URL" == http://localhost:9000 ]]
+    command -v node npm docker > /dev/null
+    docker compose version
+    docker info > /dev/null
+    docker compose config --format json | node -e '
+        let input = "";
+        process.stdin.on("data", chunk => input += chunk);
+        process.stdin.on("end", () => {
+            const config = JSON.parse(input);
+            if (config.services.web.image !== "cfbmarblegame-orb" || config.networks.traefik) {
+                process.exit(1);
+            }
+        });
+    '
+
+    docker compose run --rm -T --entrypoint composer web check-platform-reqs
+    docker compose run --rm -T --entrypoint php web -r '
+    require "vendor/autoload.php";
+    $db = new PDO("sqlite:" . getenv("DB_PATH"));
+    foreach (["teams", "games", "phinxlog"] as $table) {
+        $db->query("SELECT COUNT(*) FROM " . $table);
+    }
+    $assets = json_decode(file_get_contents("dist/asset-manifest.json"), true, flags: JSON_THROW_ON_ERROR);
+    if (!is_file("public/" . $assets["styles.css"])) {
+        throw new RuntimeException("Missing stylesheet");
+    }
+'
+CHECKS
+)"
+(cd /tmp && env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin COMPOSE_FILE=outside-repo \
+    /bin/bash -lc '[[ "$COMPOSE_FILE" == outside-repo ]]')
+(cd playwright && node -e '
+    const { chromium } = require("@playwright/test");
+    (async () => {
+        const browser = await chromium.launch();
+        await browser.close();
+    })().catch(error => { console.error(error); process.exit(1); });
+')
+echo 'PASS: setup reuses image layers, removes stale artifacts, preserves configuration/data, and selects orb Compose in new shells'

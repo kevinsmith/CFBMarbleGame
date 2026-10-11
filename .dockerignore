@@ -9,3 +9,6 @@ playwright
 app/node_modules
 app/dist/asset-manifest.json
 app/public/styles.*.css
+app/.env
+app/data/*.db
+app/tests/_coverage

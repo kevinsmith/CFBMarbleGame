@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Docker images and build layers persist; the daemon must start after activation.
+sudo systemctl start docker
+sudo chgrp "$(id -gn)" /var/run/docker.sock
+docker info > /dev/null
