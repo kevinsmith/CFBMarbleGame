@@ -105,5 +105,5 @@ docker compose run --rm -T --entrypoint composer web phinx migrate --no-interact
 echo "[setup ${SECONDS}s] Install Playwright dependencies on the orb host"
 (cd playwright && npm ci --no-audit --no-fund)
 echo "[setup ${SECONDS}s] Install Playwright Chromium on the orb host"
-(cd playwright && npx playwright install chromium)
+(cd playwright && npx playwright install --only-shell chromium)
 echo "[setup ${SECONDS}s] Ready"

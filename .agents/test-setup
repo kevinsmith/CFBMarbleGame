@@ -67,7 +67,7 @@ env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin /bin/bash -lc "$(cat <<'CH
     export PLAYWRIGHT_BROWSERS_PATH="$(mktemp -d)"
     trap 'rm -rf "$PLAYWRIGHT_BROWSERS_PATH"' EXIT
     cd playwright
-    timeout 120 npx playwright install chromium
+    timeout 120 npx playwright install --only-shell chromium
     node -e '
         const { chromium } = require("@playwright/test");
         (async () => {
