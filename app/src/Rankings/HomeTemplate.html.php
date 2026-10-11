@@ -76,7 +76,7 @@ use App\Rankings\RankedTeam;
                             <table class="min-w-full divide-y divide-gray-300 dark:divide-white/15">
                                 <thead>
                                 <tr class="divide-x divide-gray-200 dark:divide-white/10">
-                                    <th scope="col" class="py-3.5 pr-4 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-0 dark:text-white">Marble Rank</th>
+                                    <th scope="col" class="w-px px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Marble Rank</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Trend</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Team</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Marbles</th>
@@ -87,7 +87,7 @@ use App\Rankings\RankedTeam;
                                     <?php foreach ($rankings as $team) : ?>
                                         <?php $teamFootnote = $team->isFCS ? '*' : ''; ?>
                                         <tr class="divide-x divide-gray-200 dark:divide-white/10">
-                                            <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pl-0 dark:text-gray-300"><?=$team->marbleRank?></td>
+                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"><?=$team->marbleRank?></td>
                                             <?php if ($team->rankChange > 0) : ?>
                                             <td class="p-4 text-sm font-medium whitespace-nowrap text-green-600 dark:text-green-400" title="Up <?=$team->rankChange?> since the previous week">&uarr; <?=$team->rankChange?></td>
                                             <?php elseif ($team->rankChange < 0) : ?>
