@@ -5,6 +5,7 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 root="$PWD"
+outside_node="$(cd /tmp && env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin /bin/bash -lc 'node --version')"
 config_backup="$(mktemp)"
 had_config=0
 if [[ -f .env ]]; then
@@ -27,6 +28,7 @@ time "$root/.agents/resume"
 [[ "$image" == "$(docker image inspect cfbmarblegame-orb --format '{{json .RootFS.Layers}}')" ]]
 [[ ! -e app/vendor/orb-setup-stale-package && ! -e app/public/styles.orb-stale.css ]]
 [[ "$(grep -Fxc '# CFB Marble Game orb Compose environment' "$HOME/.bash_profile")" == 1 ]]
+[[ "$(grep -Fxc '# CFB Marble Game orb Node environment' "$HOME/.bash_profile")" == 1 ]]
 
 # Check the environment in a new login shell, not in the setup process.
 env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin /bin/bash -lc "$(cat <<'CHECKS'
@@ -34,6 +36,7 @@ env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin /bin/bash -lc "$(cat <<'CH
     [[ "$COMPOSE_FILE" == "$PWD/docker-compose.yml:$PWD/docker-compose.orb.yml" ]]
     [[ "$PW_BASE_URL" == http://localhost:9000 ]]
     command -v node npm docker > /dev/null
+    [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
     docker compose version
     docker info > /dev/null
     docker compose config --format json | node -e '
@@ -59,15 +62,22 @@ env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin /bin/bash -lc "$(cat <<'CH
         throw new RuntimeException("Missing stylesheet");
     }
 '
+
+    # A cached browser does not test download and extraction.
+    export PLAYWRIGHT_BROWSERS_PATH="$(mktemp -d)"
+    trap 'rm -rf "$PLAYWRIGHT_BROWSERS_PATH"' EXIT
+    cd playwright
+    timeout 120 npx playwright install chromium
+    node -e '
+        const { chromium } = require("@playwright/test");
+        (async () => {
+            const browser = await chromium.launch();
+            await browser.close();
+        })().catch(error => { console.error(error); process.exit(1); });
+    '
 CHECKS
 )"
 (cd /tmp && env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin COMPOSE_FILE=outside-repo \
     /bin/bash -lc '[[ "$COMPOSE_FILE" == outside-repo ]]')
-(cd playwright && node -e '
-    const { chromium } = require("@playwright/test");
-    (async () => {
-        const browser = await chromium.launch();
-        await browser.close();
-    })().catch(error => { console.error(error); process.exit(1); });
-')
-echo 'PASS: setup reuses image layers, removes stale artifacts, preserves configuration/data, and selects orb Compose in new shells'
+[[ "$outside_node" == "$(cd /tmp && env -i HOME="$HOME" PATH=/usr/local/bin:/usr/bin:/bin /bin/bash -lc 'node --version')" ]]
+echo 'PASS: setup reuses image layers, removes stale artifacts, preserves configuration/data, and installs Chromium with repository-scoped Node 24 LTS'

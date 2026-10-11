@@ -3,6 +3,8 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 SECONDS=0
+artifacts="$(mktemp -d)"
+trap 'rm -rf "$artifacts"' EXIT
 echo "[setup ${SECONDS}s] Prepare Docker and Playwright prerequisites"
 repository_added=0
 if ! grep -qs 'https://download.docker.com/linux/debian' \
@@ -36,6 +38,25 @@ if (( ${#missing[@]} )); then
     sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${missing[@]}"
 fi
 
+echo "[setup ${SECONDS}s] Prepare Node 24 LTS for Playwright"
+node_version=24.21.0
+node_home="$HOME/.local/share/cfbmarblegame/node"
+if [[ "$("$node_home/bin/node" --version 2>/dev/null || true)" != "v$node_version" ]]; then
+    node_release="node-v${node_version}-linux-x64"
+    curl -fsSL --connect-timeout 10 --max-time 120 --retry 2 \
+        "https://nodejs.org/dist/v${node_version}/${node_release}.tar.xz" -o "$artifacts/$node_release.tar.xz"
+    curl -fsSL --connect-timeout 10 --max-time 30 --retry 2 \
+        "https://nodejs.org/dist/v${node_version}/SHASUMS256.txt" -o "$artifacts/SHASUMS256.txt"
+    grep -F "  $node_release.tar.xz" "$artifacts/SHASUMS256.txt" | \
+        (cd "$artifacts" && sha256sum --check -)
+    tar -xJf "$artifacts/$node_release.tar.xz" -C "$artifacts"
+    mkdir -p "$(dirname "$node_home")"
+    rm -rf "$node_home"
+    mv "$artifacts/$node_release" "$node_home"
+fi
+export PATH="$node_home/bin:$PATH"
+node_profile_marker='# CFB Marble Game orb Node environment'
+
 [[ -f app/.env ]] || cp app/.env.example app/.env
 [[ -f playwright/.env ]] || cp playwright/.env.example playwright/.env
 export COMPOSE_FILE="$PWD/docker-compose.yml:$PWD/docker-compose.orb.yml"
@@ -43,6 +64,15 @@ profile_marker='# CFB Marble Game orb Compose environment'
 if [[ ! -f "$HOME/.bash_profile" ]]; then
     # shellcheck disable=SC2016
     printf '[ ! -f "$HOME/.profile" ] || . "$HOME/.profile"\n' > "$HOME/.bash_profile"
+fi
+if ! grep -Fqx "$node_profile_marker" "$HOME/.bash_profile"; then
+    cat >> "$HOME/.bash_profile" <<EOF
+
+$node_profile_marker
+if [[ "\$PWD" == "$PWD" || "\$PWD" == "$PWD/"* ]]; then
+    export PATH="$node_home/bin:\$PATH"
+fi
+EOF
 fi
 if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile"; then
     cat >> "$HOME/.bash_profile" <<EOF
@@ -58,11 +88,10 @@ fi
 
 echo "[setup ${SECONDS}s] Build the existing app image with development dependencies"
 docker compose build
+echo "[setup ${SECONDS}s] Prepare the Dockerfile linter image"
 docker image inspect hadolint/hadolint > /dev/null 2>&1 || docker pull hadolint/hadolint
 
 echo "[setup ${SECONDS}s] Copy image-built dependencies and assets to the development mount"
-artifacts="$(mktemp -d)"
-trap 'rm -rf "$artifacts"' EXIT
 docker run --rm --entrypoint bash cfbmarblegame-orb -lc \
     'tar -cf - vendor dist/asset-manifest.json public/styles.*.css' | tar -xf - -C "$artifacts"
 rm -rf app/vendor
@@ -70,8 +99,11 @@ mv "$artifacts/vendor" app/vendor
 rm -f app/public/styles.*.css
 mv "$artifacts/public/"styles.*.css app/public/
 mv "$artifacts/dist/asset-manifest.json" app/dist/
+echo "[setup ${SECONDS}s] Apply local database migrations"
 docker compose run --rm -T --entrypoint composer web phinx migrate --no-interaction
 
-echo "[setup ${SECONDS}s] Prepare Playwright on the orb host"
-(cd playwright && npm ci --no-audit --no-fund && npx playwright install chromium)
+echo "[setup ${SECONDS}s] Install Playwright dependencies on the orb host"
+(cd playwright && npm ci --no-audit --no-fund)
+echo "[setup ${SECONDS}s] Install Playwright Chromium on the orb host"
+(cd playwright && npx playwright install chromium)
 echo "[setup ${SECONDS}s] Ready"

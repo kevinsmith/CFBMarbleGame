@@ -32,4 +32,6 @@ Once all that's in place, run `docker compose up` to start up the local dev serv
 
 Contributors to this open-source project may need to create their own [Amp account](https://ampcode.com) and [project for this repository or their fork](https://ampcode.com/docs/orbs/getting-started) to use the optional remote development setup. Amp automatically prepares and caches the existing Docker toolchain and dependencies.
 
+The first setup builds PHP extensions from source, so it can take several minutes on a single-CPU orb. Later setup runs reuse Docker build layers and browser downloads. Setup logs include elapsed times for each major step.
+
 Open the preview from Amp's Portals tab; Amp starts the declared service automatically if it is not already running. The local Docker workflow above does not require an Amp account.
