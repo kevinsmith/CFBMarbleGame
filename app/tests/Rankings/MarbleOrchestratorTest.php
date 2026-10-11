@@ -16,7 +16,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
+use Stringable;
 
 use function array_map;
 use function array_values;
@@ -244,6 +246,84 @@ final class MarbleOrchestratorTest extends TestCase
             ['Texas' => 173, 'Georgia' => 115, 'Oklahoma' => 115, 'LSU' => 77],
             self::marbleCountsByName($rankedTeams),
         );
+    }
+
+    public function testPreviousRanksComeFromTheWeekBeforeTheRequestedWeek(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+        $baylor = TeamGameFactory::team(3, 'Baylor', conference: Conference::Big12);
+        $southDakotaState = TeamGameFactory::team(
+            4,
+            'South Dakota State',
+            subdivision: Subdivision::FCS,
+            conference: Conference::MVFC,
+        );
+
+        $games = [
+            TeamGameFactory::game(10, 1, $texas, $baylor, Winner::Home),
+            TeamGameFactory::game(11, 2, $oklahoma, $texas, Winner::Home),
+            TeamGameFactory::game(12, 2, $southDakotaState, $baylor, Winner::Home),
+        ];
+
+        [$rankedTeams, $previousRanks] = $this->makeOrchestrator()->getRankedTeamsWithPreviousRanks(
+            3,
+            [$texas, $oklahoma, $baylor, $southDakotaState],
+            $games,
+        );
+
+        self::assertSame(
+            ['Oklahoma' => 138, 'Texas' => 114, 'Baylor' => 66, 'South Dakota State' => 22],
+            self::marbleCountsByName($rankedTeams),
+        );
+        self::assertSame(
+            ['Oklahoma' => 1, 'Texas' => 2, 'Baylor' => 3, 'South Dakota State' => 4],
+            self::ranksByName($rankedTeams),
+        );
+        self::assertSame([1 => 1, 2 => 2, 3 => 3], $previousRanks);
+    }
+
+    public function testPreviousRanksAreEmptyForThePreseasonWeek(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+        $games = [TeamGameFactory::game(10, 1, $texas, $oklahoma, Winner::Home)];
+
+        [$rankedTeams, $previousRanks] = $this->makeOrchestrator()->getRankedTeamsWithPreviousRanks(
+            1,
+            [$texas, $oklahoma],
+            $games,
+        );
+
+        self::assertSame(['Oklahoma' => 110, 'Texas' => 110], self::marbleCountsByName($rankedTeams));
+        self::assertSame([], $previousRanks);
+    }
+
+    public function testPreviousRanksAwardTheMarblesForEachGameOnlyOnce(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+        $games = [
+            TeamGameFactory::game(10, 1, $texas, $oklahoma, Winner::Home),
+            TeamGameFactory::game(11, 2, $oklahoma, $texas, Winner::Home),
+            TeamGameFactory::game(12, 3, $texas, $oklahoma, Winner::Home),
+        ];
+        $logger = new class extends AbstractLogger {
+            /** @var list<int> */
+            public array $awardedGameIds = [];
+
+            /** @param array<string, mixed> $context */
+            public function log(mixed $level, string|Stringable $message, array $context = []): void
+            {
+                /** @var array{game: array{id: int}} $gameContext */
+                $gameContext = $context;
+                $this->awardedGameIds[] = $gameContext['game']['id'];
+            }
+        };
+
+        new MarbleOrchestrator($logger)->getRankedTeamsWithPreviousRanks(4, [$texas, $oklahoma], $games);
+
+        self::assertSame([10, 11, 12], $logger->awardedGameIds);
     }
 
     /** @return array{0: Team[], 1: Game[]} */

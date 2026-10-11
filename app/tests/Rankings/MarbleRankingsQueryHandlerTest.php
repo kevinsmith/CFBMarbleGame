@@ -125,12 +125,48 @@ final class MarbleRankingsQueryHandlerTest extends TestCase
 
         self::assertEquals(
             [
-                new RankedTeam('Oklahoma', 'Big 12', 100, 1, false),
-                new RankedTeam('Texas', 'SEC', 75, 2, false),
-                new RankedTeam('South Dakota State', 'MVFC', 25, 3, true),
+                new RankedTeam('Oklahoma', 'Big 12', 100, 1, false, 0),
+                new RankedTeam('Texas', 'SEC', 75, 2, false, -1),
+                new RankedTeam('South Dakota State', 'MVFC', 25, 3, true, null),
             ],
             $rankedTeams,
         );
+    }
+
+    public function testRankChangeComparesAgainstThePreviousWeek(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+        $baylor = TeamGameFactory::team(3, 'Baylor', conference: Conference::Big12);
+
+        $games = [
+            TeamGameFactory::game(10, 1, $texas, $baylor, Winner::Home),
+            TeamGameFactory::game(11, 2, $oklahoma, $texas, Winner::Home),
+        ];
+
+        $handler = $this->makeHandler([$texas, $oklahoma, $baylor], $games);
+
+        [, , $rankedTeams] = $handler->getRankings(week: 3);
+
+        self::assertSame(
+            ['Oklahoma' => 1, 'Texas' => -1, 'Baylor' => 0],
+            self::rankChangesByName($rankedTeams),
+        );
+    }
+
+    public function testRankChangeIsNullForThePreseasonWeek(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+
+        $handler = $this->makeHandler(
+            [$texas, $oklahoma],
+            [TeamGameFactory::game(10, 1, $texas, $oklahoma, Winner::Home)],
+        );
+
+        [, , $rankedTeams] = $handler->getRankings(week: 1);
+
+        self::assertSame(['Oklahoma' => null, 'Texas' => null], self::rankChangesByName($rankedTeams));
     }
 
     public function testUnknownSeasonThrows(): void
@@ -236,6 +272,22 @@ final class MarbleRankingsQueryHandlerTest extends TestCase
                 return array_values($seasons);
             }
         };
+    }
+
+    /**
+     * @param RankedTeam[] $rankedTeams
+     *
+     * @return array<string, int|null>
+     */
+    private static function rankChangesByName(array $rankedTeams): array
+    {
+        $changes = [];
+
+        foreach ($rankedTeams as $rankedTeam) {
+            $changes[$rankedTeam->teamName] = $rankedTeam->rankChange;
+        }
+
+        return $changes;
     }
 
     /**

@@ -41,9 +41,34 @@ final readonly class MarbleOrchestrator
             $this->awardMarbles($game);
         }
 
-        $teams = $this->removeTeamsWithoutMarbles($teams);
+        return $this->rankTeamsWithMarbles($teams);
+    }
 
-        return $this->applyStandardCompetitionRanking($teams);
+    /**
+     * Rank the teams for the week and for the previous week in one pass over the games.
+     *
+     * @param Team[] $teams
+     * @param Game[] $games
+     *
+     * @return array{0: Team[], 1: array<int, int>} The ranked teams, and the previous rank of each team by team id.
+     */
+    public function getRankedTeamsWithPreviousRanks(int $week, array $teams, array $games): array
+    {
+        if ($week <= 1) {
+            return [$this->getRankedTeams($week, $teams, $games), []];
+        }
+
+        $previousRanks = [];
+
+        foreach ($this->getRankedTeams($week - 1, $teams, $games) as $team) {
+            $previousRanks[$team->id->id] = $team->getMarbleRank();
+        }
+
+        foreach ($this->gamesInWeek($week - 1, $games) as $game) {
+            $this->awardMarbles($game);
+        }
+
+        return [$this->rankTeamsWithMarbles($teams), $previousRanks];
     }
 
     /** @param Game[] $games */
@@ -135,6 +160,16 @@ final readonly class MarbleOrchestrator
      *
      * @return Team[]
      */
+    private function rankTeamsWithMarbles(array $teams): array
+    {
+        return $this->applyStandardCompetitionRanking($this->removeTeamsWithoutMarbles($teams));
+    }
+
+    /**
+     * @param Team[] $teams
+     *
+     * @return Team[]
+     */
     private function removeTeamsWithoutMarbles(array $teams): array
     {
         return array_values(
@@ -165,6 +200,18 @@ final readonly class MarbleOrchestrator
         ksort($gamesByWeek);
 
         return array_merge(...$gamesByWeek);
+    }
+
+    /**
+     * @param Game[] $games
+     *
+     * @return Game[]
+     */
+    private function gamesInWeek(int $week, array $games): array
+    {
+        return array_values(
+            array_filter($games, static fn (Game $game): bool => $game->weekNumber === $week),
+        );
     }
 
     /** @param Game[] $gamesForTheWeek */

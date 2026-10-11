@@ -46,17 +46,22 @@ final readonly class MarbleRankingsQueryHandler
             throw new InvalidArgumentException('Rankings not yet available for week ' . $week . '.');
         }
 
+        [$rankedTeams, $previousRanks] = $this->marbleOrchestrator->getRankedTeamsWithPreviousRanks($week, $teams, $games);
+
         $rankings = array_map(
-            static function (Team $team): RankedTeam {
+            static function (Team $team) use ($previousRanks): RankedTeam {
+                $previousRank = $previousRanks[$team->id->id] ?? null;
+
                 return new RankedTeam(
                     $team->teamName,
                     $team->conference->value,
                     $team->getMarbles(),
                     $team->getMarbleRank(),
                     $team->subdivision === Subdivision::FCS,
+                    $previousRank === null ? null : $previousRank - $team->getMarbleRank(),
                 );
             },
-            $this->marbleOrchestrator->getRankedTeams($week, $teams, $games),
+            $rankedTeams,
         );
 
         return [$week, $latestWeekWithRankings, $rankings, $season, $seasons === [] ? [$season] : $seasons];

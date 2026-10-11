@@ -141,6 +141,22 @@ final class HomeTest extends TestCase
         self::assertStringContainsString('South Dakota State*', $html);
     }
 
+    public function testRankChangesAreShownWithArrowsAndColors(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
+        $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
+        $this->insertTeam(3, 'Baylor', 'FBS', 'Big 12');
+        $this->insertGame(10, 1, 1, 3, 'home');
+        $this->insertGame(11, 2, 2, 1, 'home');
+
+        $html = $this->html(($this->home)($this->request(['week' => '3'])));
+
+        self::assertStringContainsString('>Trend</th>', $html);
+        self::assertMatchesRegularExpression('/text-green-600[^>]*title="Up 1 since the previous week">&uarr; 1</', $html);
+        self::assertMatchesRegularExpression('/text-red-600[^>]*title="Down 1 since the previous week">&darr; 1</', $html);
+        self::assertStringContainsString('>&ndash;</td>', $html);
+    }
+
     public function testNonNumericSeasonReturns404(): void
     {
         $response = ($this->home)($this->request(['season' => 'abc']));
