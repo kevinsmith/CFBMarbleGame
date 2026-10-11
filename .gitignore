@@ -13,4 +13,5 @@ assets/
 .claude
 app/data/cfbmarblegame.db
 .amp/portals/
+.amp/data-refresh.*
 /.env

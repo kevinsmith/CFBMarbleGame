@@ -7,4 +7,4 @@ services:
       COMPOSE_FILE: docker-compose.yml:docker-compose.orb.yml
     portal:
       title: CFB Marble Game
-      description: Docker nginx/PHP-FPM preview with a local SQLite database. No live data refresh runs automatically.
+      description: Docker nginx/PHP-FPM preview with local SQLite data refreshed once on first orb activation. Requires CFBD_API_KEY in Amp secrets.

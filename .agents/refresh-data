@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+: "${AMP_THREAD_ID:?Data refresh must run after orb activation}"
+export COMPOSE_FILE="$PWD/docker-compose.yml:$PWD/docker-compose.orb.yml"
+
+# Snapshots may contain another orb's marker; thread identity survives wakes,
+# but changes for every new orb. Lock against concurrent resume/service starts.
+exec 9> .amp/data-refresh.lock
+flock 9
+if [[ -f .amp/data-refresh.done && "$(cat .amp/data-refresh.done)" == "$AMP_THREAD_ID" ]]; then
+    exit 0
+fi
+
+echo '[orb] Refresh current-season data (requires CFBD_API_KEY)'
+docker compose run --rm -T --entrypoint composer web phinx migrate --no-interaction
+env_args=()
+if [[ -n "${CFBD_API_KEY:-}" ]]; then
+    # Pass the value through Docker's environment, not its command line.
+    env_args=(--env CFBD_API_KEY)
+fi
+docker compose run --rm -T "${env_args[@]}" --entrypoint php web console data:refresh --no-interaction
+# A failure must remain retryable rather than blessing stale snapshot data.
+printf '%s\n' "$AMP_THREAD_ID" > .amp/data-refresh.done
+echo '[orb] Fresh data ready'

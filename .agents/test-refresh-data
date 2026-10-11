@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+sandbox="$(mktemp -d)"
+trap 'rm -rf "$sandbox"' EXIT
+mkdir -p "$sandbox/.agents" "$sandbox/.amp" "$sandbox/bin"
+cp .agents/refresh-data .agents/resume "$sandbox/.agents/"
+printf '#!/usr/bin/env bash\nexit 0\n' > "$sandbox/bin/sudo"
+cat > "$sandbox/bin/docker" <<'DOCKER'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$1" == info ]]; then
+    exit 0
+fi
+if [[ "$*" == *'phinx migrate'* ]]; then
+    exit "${FAIL_MIGRATION:-0}"
+fi
+[[ "$*" == *'console data:refresh --no-interaction'* ]]
+# Ensure host secrets reach the CLI without being embedded in arguments.
+if [[ -n "${CFBD_API_KEY:-}" ]]; then
+    [[ "$*" == *'--env CFBD_API_KEY'* && "$*" != *"$CFBD_API_KEY"* ]]
+fi
+sleep 0.1
+[[ "${FAIL_REFRESH:-0}" == 0 ]]
+# Stand in for the external API updating the orb's database.
+printf '%s\n' "$AMP_THREAD_ID" >> fresh-data
+DOCKER
+chmod +x "$sandbox/bin/docker" "$sandbox/bin/sudo"
+export PATH="$sandbox/bin:$PATH"
+export AMP_THREAD_ID=orb-one CFBD_API_KEY=test-key
+refresh="$sandbox/.agents/resume"
+
+# Snapshot preparation must not fetch live data or create a success marker.
+"$refresh" --setup
+[[ ! -e "$sandbox/fresh-data" && ! -e "$sandbox/.amp/data-refresh.done" ]]
+
+"$refresh"
+"$refresh"
+[[ "$(cat "$sandbox/fresh-data")" == orb-one ]]
+[[ "$(cat "$sandbox/.amp/data-refresh.done")" == orb-one ]]
+
+# A clone must refresh even if it inherited the original orb's success marker.
+export AMP_THREAD_ID=orb-two
+if FAIL_REFRESH=1 "$refresh"; then
+    echo 'FAIL: refresh failure was swallowed' >&2
+    exit 1
+fi
+[[ "$(cat "$sandbox/.amp/data-refresh.done")" == orb-one ]]
+if FAIL_MIGRATION=1 "$refresh"; then
+    echo 'FAIL: migration failure was swallowed' >&2
+    exit 1
+fi
+[[ "$(cat "$sandbox/fresh-data")" == orb-one ]]
+
+# Concurrent lifecycle and service starts must refresh exactly once after retry.
+"$refresh" &
+first=$!
+"$refresh" &
+second=$!
+wait "$first"
+wait "$second"
+[[ "$(cat "$sandbox/fresh-data")" == $'orb-one\norb-two' ]]
+[[ "$(cat "$sandbox/.amp/data-refresh.done")" == orb-two ]]
+
+# An app/.env credential can still be used when no host credential is provided.
+AMP_THREAD_ID=orb-three CFBD_API_KEY='' "$refresh"
+[[ "$(cat "$sandbox/fresh-data")" == $'orb-one\norb-two\norb-three' ]]
+echo 'PASS: fresh orbs refresh once, wakes skip, clones refresh, failures retry, and concurrent starts serialize'

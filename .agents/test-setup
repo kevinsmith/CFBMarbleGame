@@ -23,7 +23,7 @@ printf '%s\n' 'stale stylesheet' > app/public/styles.orb-stale.css
 before="$(sha256sum .env app/.env playwright/.env app/data/cfbmarblegame.db app/public/index.php)"
 image="$(docker image inspect cfbmarblegame-orb --format '{{json .RootFS.Layers}}')"
 time "$root/.agents/setup"
-time "$root/.agents/resume"
+time "$root/.agents/resume" --setup
 [[ "$before" == "$(sha256sum .env app/.env playwright/.env app/data/cfbmarblegame.db app/public/index.php)" ]]
 [[ "$image" == "$(docker image inspect cfbmarblegame-orb --format '{{json .RootFS.Layers}}')" ]]
 [[ ! -e app/vendor/orb-setup-stale-package && ! -e app/public/styles.orb-stale.css ]]

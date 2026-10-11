@@ -84,7 +84,7 @@ if [[ "\$PWD" == "$PWD" || "\$PWD" == "$PWD/"* ]]; then
 fi
 EOF
 fi
-.agents/resume
+.agents/resume --setup
 
 echo "[setup ${SECONDS}s] Build the existing app image with development dependencies"
 docker compose build

@@ -34,4 +34,6 @@ Contributors to this open-source project may need to create their own [Amp accou
 
 The first setup builds PHP extensions from source, so it can take several minutes on a single-CPU orb. Later setup runs reuse Docker build layers and browser downloads. Setup logs include elapsed times for each major step.
 
+Add `CFBD_API_KEY` to your Amp project's secrets before starting an orb. After activation, each new orb runs `data:refresh` for the current season before starting the preview, including orbs restored from a cached snapshot. Successful refreshes are not repeated on wakes or service restarts; failures stop preview startup and are retried on the next wake or service start. Live data is not refreshed during snapshot setup.
+
 Open the preview from Amp's Portals tab; Amp starts the declared service automatically if it is not already running. The local Docker workflow above does not require an Amp account.

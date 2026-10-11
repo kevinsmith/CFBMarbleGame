@@ -5,3 +5,8 @@ set -euo pipefail
 sudo systemctl start docker
 sudo chgrp "$(id -gn)" /var/run/docker.sock
 docker info > /dev/null
+
+# Setup prepares a reusable snapshot, not the current orb's live data.
+if [[ "${1:-}" != --setup ]]; then
+    "$(dirname "${BASH_SOURCE[0]}")/refresh-data"
+fi
