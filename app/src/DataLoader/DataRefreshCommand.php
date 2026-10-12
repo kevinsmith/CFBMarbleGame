@@ -65,6 +65,8 @@ final class DataRefreshCommand extends Command
 
         try {
             $retriever->pullAndStoreFreshData((int) $year);
+            new ApPollsDataRefresher($this->cfbdApiClient, $this->pdo)->pullAndStoreFreshData((int) $year);
+            $consoleLogger->notice('AP rankings refreshed successfully');
 
             return Command::SUCCESS;
         } catch (Throwable $e) {
