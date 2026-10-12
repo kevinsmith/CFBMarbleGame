@@ -14,6 +14,7 @@ final readonly class RankedTeam
         public bool $isFCS,
         /** Positive when the team moved up since the previous week. Null when the team had no previous rank. */
         public int|null $rankChange = null,
+        public int|null $apRank = null,
     ) {
     }
 }

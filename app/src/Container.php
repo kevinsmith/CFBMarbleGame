@@ -11,6 +11,8 @@ use App\Rankings\Games\SqliteGameRepository;
 use App\Rankings\Home;
 use App\Rankings\MarbleOrchestrator;
 use App\Rankings\MarbleRankingsQueryHandler;
+use App\Rankings\Polls\ApPollRepository;
+use App\Rankings\Polls\SqliteApPollRepository;
 use App\Rankings\Teams\CachedTeamRepository;
 use App\Rankings\Teams\SqliteTeamRepository;
 use App\Rankings\Teams\TeamRepository;
@@ -78,6 +80,9 @@ final readonly class Container
                     $c->get(PDO::class),
                     $c->get(TeamRepository::class),
                 );
+            },
+            ApPollRepository::class => static function (ContainerInterface $c) {
+                return new SqliteApPollRepository($c->get(PDO::class));
             },
             DataRefreshCommand::class => static function (ContainerInterface $c) {
                 $apiKey = self::getSecret('CFBD_API_KEY');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rankings;
 
 use App\Rankings\Games\GameRepository;
+use App\Rankings\Polls\ApPollRepository;
 use App\Rankings\Teams\Subdivision;
 use App\Rankings\Teams\Team;
 use App\Rankings\Teams\TeamRepository;
@@ -21,6 +22,7 @@ final readonly class MarbleRankingsQueryHandler
         private TeamRepository $teamRepository,
         private GameRepository $gameRepository,
         private MarbleOrchestrator $marbleOrchestrator,
+        private ApPollRepository $apPollRepository,
     ) {
     }
 
@@ -47,9 +49,10 @@ final readonly class MarbleRankingsQueryHandler
         }
 
         [$rankedTeams, $previousRanks] = $this->marbleOrchestrator->getRankedTeamsWithPreviousRanks($week, $teams, $games);
+        $apRanks = $this->apPollRepository->getRanks($season, $week);
 
         $rankings = array_map(
-            static function (Team $team) use ($previousRanks): RankedTeam {
+            static function (Team $team) use ($previousRanks, $apRanks): RankedTeam {
                 $previousRank = $previousRanks[$team->id->id] ?? null;
 
                 return new RankedTeam(
@@ -59,6 +62,7 @@ final readonly class MarbleRankingsQueryHandler
                     $team->getMarbleRank(),
                     $team->subdivision === Subdivision::FCS,
                     $previousRank === null ? null : $previousRank - $team->getMarbleRank(),
+                    $apRanks[$team->id->id] ?? null,
                 );
             },
             $rankedTeams,

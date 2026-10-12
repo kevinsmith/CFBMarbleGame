@@ -79,6 +79,7 @@ use App\Rankings\RankedTeam;
                                 <tr class="divide-x divide-gray-200">
                                     <th scope="col" class="w-px px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Marble Rank</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Trend</th>
+                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">AP Poll</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Team</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Marbles</th>
                                     <th scope="col" class="py-3.5 pr-4 pl-4 text-left text-sm font-semibold text-gray-900 sm:pr-0">Conference</th>
@@ -96,6 +97,7 @@ use App\Rankings\RankedTeam;
                                             <?php else : ?>
                                             <td class="p-4 text-sm whitespace-nowrap text-gray-400">&ndash;</td>
                                             <?php endif; ?>
+                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->apRank ?? '&ndash;'?></td>
                                             <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900"><?=$team->teamName . $teamFootnote?></td>
                                             <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->marbleCount?></td>
                                             <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pr-0"><?=$team->conference?></td>

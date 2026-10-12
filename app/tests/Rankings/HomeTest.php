@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Rankings;
 
+use App\DataLoader\ApPollsDataRefresher;
 use App\IdentityMap;
 use App\Rankings\Games\Game;
 use App\Rankings\Games\GameId;
@@ -11,6 +12,7 @@ use App\Rankings\Games\SqliteGameRepository;
 use App\Rankings\Home;
 use App\Rankings\MarbleOrchestrator;
 use App\Rankings\MarbleRankingsQueryHandler;
+use App\Rankings\Polls\SqliteApPollRepository;
 use App\Rankings\RankedTeam;
 use App\Rankings\Teams\CachedTeamRepository;
 use App\Rankings\Teams\Conference;
@@ -18,6 +20,10 @@ use App\Rankings\Teams\SqliteTeamRepository;
 use App\Rankings\Teams\Subdivision;
 use App\Rankings\Teams\Team;
 use App\Rankings\Teams\TeamId;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response as ApiResponse;
 use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -28,8 +34,12 @@ use Sapien\Response;
 use Tests\SqliteTestDatabase;
 
 use function date;
+use function json_encode;
+
+use const JSON_THROW_ON_ERROR;
 
 #[CoversClass(Home::class)]
+#[UsesClass(ApPollsDataRefresher::class)]
 #[UsesClass(CachedTeamRepository::class)]
 #[UsesClass(Conference::class)]
 #[UsesClass(Game::class)]
@@ -38,6 +48,7 @@ use function date;
 #[UsesClass(MarbleOrchestrator::class)]
 #[UsesClass(MarbleRankingsQueryHandler::class)]
 #[UsesClass(RankedTeam::class)]
+#[UsesClass(SqliteApPollRepository::class)]
 #[UsesClass(SqliteGameRepository::class)]
 #[UsesClass(SqliteTeamRepository::class)]
 #[UsesClass(Subdivision::class)]
@@ -52,15 +63,7 @@ final class HomeTest extends TestCase
     protected function setUp(): void
     {
         $this->pdo = SqliteTestDatabase::pdo();
-        $teams = new CachedTeamRepository(new SqliteTeamRepository($this->pdo));
-        $this->home = new Home(
-            new MarbleRankingsQueryHandler(
-                $teams,
-                new SqliteGameRepository($this->pdo, $teams),
-                new MarbleOrchestrator(new NullLogger()),
-            ),
-            'styles.test.css',
-        );
+        $this->home = $this->makeHome();
     }
 
     public function testDefaultPageReturnsRankingsHtml(): void
@@ -170,6 +173,79 @@ final class HomeTest extends TestCase
         self::assertStringContainsString('>&ndash;</td>', $html);
     }
 
+    public function testApRanksMatchTheSelectedSeasonAndWeek(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC', 251);
+        $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12', 201);
+        $this->insertGame(10, 1, 1, 2, 'home');
+        $this->insertGame(11, 2, 2, 1, 'home');
+        $this->pdo->exec(<<<'SQL'
+        INSERT INTO ap_rankings (season, week, cfbd_id, rank) VALUES
+            (2025, 1, 251, 1),
+            (2025, 2, 251, 7),
+            (2025, 2, 1, 23),
+            (2026, 2, 251, 19);
+        SQL);
+
+        $html = $this->html(($this->home)($this->request(['season' => '2025', 'week' => '2'])));
+
+        self::assertMatchesRegularExpression('/>Trend<\/th>\s*<th[^>]*>AP Poll<\/th>\s*<th[^>]*>Team<\/th>/', $html);
+        self::assertMatchesRegularExpression('/<td[^>]*>7<\/td>\s*<td[^>]*>Texas<\/td>/', $html);
+        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma<\/td>/', $html);
+
+        $preseason = $this->html(($this->home)($this->request(['season' => '2025', 'week' => '1'])));
+        self::assertMatchesRegularExpression('/<td[^>]*>1<\/td>\s*<td[^>]*>Texas<\/td>/', $preseason);
+
+        $unpublished = $this->html(($this->home)($this->request(['season' => '2025', 'week' => '3'])));
+        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Texas<\/td>/', $unpublished);
+    }
+
+    public function testUnpublishedApPollAppearsAfterTheNextRefresh(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC', 251);
+        $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12', 201);
+        $this->insertGame(10, 1, 1, 2, 'home');
+
+        $poll = [
+            'season' => 2025,
+            'seasonType' => 'regular',
+            'week' => 1,
+            'polls' => [
+                [
+                    'poll' => 'AP Top 25',
+                    'ranks' => [
+                        ['teamId' => 251, 'school' => 'Texas Longhorns', 'rank' => 1],
+                        ['teamId' => 201, 'school' => 'Oklahoma Sooners', 'rank' => 18],
+                    ],
+                ],
+            ],
+        ];
+        $publishedPoll = $poll;
+        $publishedPoll['week'] = 2;
+        $publishedPoll['polls'][0]['ranks'] = [
+            ['teamId' => 251, 'school' => 'Texas Longhorns', 'rank' => 7],
+            ['teamId' => 201, 'school' => 'Oklahoma Sooners', 'rank' => 15],
+        ];
+        $client = new Client([
+            'handler' => HandlerStack::create(new MockHandler([
+                new ApiResponse(200, [], json_encode([$poll], JSON_THROW_ON_ERROR)),
+                new ApiResponse(200, [], json_encode([$poll, $publishedPoll], JSON_THROW_ON_ERROR)),
+            ])),
+        ]);
+        $refresher = new ApPollsDataRefresher($client, $this->pdo);
+        $request = $this->request(['season' => '2025', 'week' => '2']);
+
+        $refresher->pullAndStoreFreshData(2025);
+        $unpublished = $this->html(($this->home)($request));
+        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Texas<\/td>\s*<td[^>]*>132<\/td>/', $unpublished);
+        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma<\/td>\s*<td[^>]*>88<\/td>/', $unpublished);
+
+        $refresher->pullAndStoreFreshData(2025);
+        $published = $this->html(($this->makeHome())($request));
+        self::assertMatchesRegularExpression('/<td[^>]*>7<\/td>\s*<td[^>]*>Texas<\/td>\s*<td[^>]*>132<\/td>/', $published);
+        self::assertMatchesRegularExpression('/<td[^>]*>15<\/td>\s*<td[^>]*>Oklahoma<\/td>\s*<td[^>]*>88<\/td>/', $published);
+    }
+
     public function testNonNumericSeasonReturns404(): void
     {
         $response = ($this->home)($this->request(['season' => 'abc']));
@@ -188,6 +264,21 @@ final class HomeTest extends TestCase
         self::assertSame(404, $response->getCode());
     }
 
+    private function makeHome(): Home
+    {
+        $teams = new CachedTeamRepository(new SqliteTeamRepository($this->pdo));
+
+        return new Home(
+            new MarbleRankingsQueryHandler(
+                $teams,
+                new SqliteGameRepository($this->pdo, $teams),
+                new MarbleOrchestrator(new NullLogger()),
+                new SqliteApPollRepository($this->pdo),
+            ),
+            'styles.test.css',
+        );
+    }
+
     /** @param array<string, string> $query */
     private function request(array $query = []): Request
     {
@@ -202,16 +293,23 @@ final class HomeTest extends TestCase
         return $html;
     }
 
-    private function insertTeam(int $id, string $name, string $subdivision, string $conference): void
-    {
+    private function insertTeam(
+        int $id,
+        string $name,
+        string $subdivision,
+        string $conference,
+        int|null $cfbdId = null,
+    ): void {
         $statement = $this->pdo->prepare(
-            'INSERT INTO teams (id, name, subdivision, conference) VALUES (:id, :name, :subdivision, :conference)',
+            'INSERT INTO teams (id, name, subdivision, conference, cfbd_id)
+             VALUES (:id, :name, :subdivision, :conference, :cfbd_id)',
         );
         $statement->execute([
             'id' => $id,
             'name' => $name,
             'subdivision' => $subdivision,
             'conference' => $conference,
+            'cfbd_id' => $cfbdId,
         ]);
     }
 

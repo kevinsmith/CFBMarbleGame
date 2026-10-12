@@ -10,6 +10,7 @@ use App\Rankings\Games\GameRepository;
 use App\Rankings\Games\Winner;
 use App\Rankings\MarbleOrchestrator;
 use App\Rankings\MarbleRankingsQueryHandler;
+use App\Rankings\Polls\ApPollRepository;
 use App\Rankings\RankedTeam;
 use App\Rankings\Teams\Conference;
 use App\Rankings\Teams\Subdivision;
@@ -212,6 +213,13 @@ final class MarbleRankingsQueryHandlerTest extends TestCase
             self::makeTeamRepository($teams),
             self::makeGameRepository($games),
             new MarbleOrchestrator(new NullLogger()),
+            new class implements ApPollRepository {
+                /** @return array<int, int> */
+                public function getRanks(int $season, int $week): array
+                {
+                    return [];
+                }
+            },
         );
     }
 
