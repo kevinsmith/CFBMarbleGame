@@ -167,10 +167,15 @@ final class HomeTest extends TestCase
 
         $html = $this->html(($this->home)($this->request(['week' => '3'])));
 
-        self::assertStringContainsString('>Trend</th>', $html);
-        self::assertMatchesRegularExpression('/text-green-600[^>]*title="Up 1 since the previous week">&uarr; 1</', $html);
-        self::assertMatchesRegularExpression('/text-red-600[^>]*title="Down 1 since the previous week">&darr; 1</', $html);
-        self::assertStringContainsString('>&ndash;</td>', $html);
+        self::assertStringNotContainsString('>Trend</th>', $html);
+        self::assertMatchesRegularExpression('/<td[^>]*>\s*1\s*<span[^>]*text-green-600[^>]*title="Up 1 since the previous week">&uarr; 1<\/span>\s*<\/td>/', $html);
+        self::assertMatchesRegularExpression('/<td[^>]*>\s*2\s*<span[^>]*text-red-600[^>]*title="Down 1 since the previous week">&darr; 1<\/span>\s*<\/td>/', $html);
+        self::assertMatchesRegularExpression('/<td[^>]*>\s*3\s*<\/td>\s*<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Baylor<\/td>/', $html);
+
+        $preseason = $this->html(($this->home)($this->request(['week' => '1'])));
+        self::assertStringNotContainsString('&uarr;', $preseason);
+        self::assertStringNotContainsString('&darr;', $preseason);
+        self::assertMatchesRegularExpression('/<td[^>]*>\s*1\s*<\/td>/', $preseason);
     }
 
     public function testApRanksMatchTheSelectedSeasonAndWeek(): void
@@ -189,7 +194,7 @@ final class HomeTest extends TestCase
 
         $html = $this->html(($this->home)($this->request(['season' => '2025', 'week' => '2'])));
 
-        self::assertMatchesRegularExpression('/>Trend<\/th>\s*<th[^>]*>AP Poll<\/th>\s*<th[^>]*>Team<\/th>/', $html);
+        self::assertMatchesRegularExpression('/>Marble Rank<\/th>\s*<th[^>]*>AP Poll<\/th>\s*<th[^>]*>Team<\/th>/', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>7<\/td>\s*<td[^>]*>Texas<\/td>/', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma<\/td>/', $html);
 

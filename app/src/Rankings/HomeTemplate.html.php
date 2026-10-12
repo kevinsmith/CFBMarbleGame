@@ -78,7 +78,6 @@ use App\Rankings\RankedTeam;
                                 <thead>
                                 <tr class="divide-x divide-gray-200">
                                     <th scope="col" class="w-px px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Marble Rank</th>
-                                    <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Trend</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">AP Poll</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Team</th>
                                     <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Marbles</th>
@@ -89,14 +88,14 @@ use App\Rankings\RankedTeam;
                                     <?php foreach ($rankings as $team) : ?>
                                         <?php $teamFootnote = $team->isFCS ? '*' : ''; ?>
                                         <tr class="divide-x divide-gray-200">
-                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->marbleRank?></td>
-                                            <?php if ($team->rankChange > 0) : ?>
-                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-green-600" title="Up <?=$team->rankChange?> since the previous week">&uarr; <?=$team->rankChange?></td>
-                                            <?php elseif ($team->rankChange < 0) : ?>
-                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-red-600" title="Down <?=abs($team->rankChange)?> since the previous week">&darr; <?=abs($team->rankChange)?></td>
-                                            <?php else : ?>
-                                            <td class="p-4 text-sm whitespace-nowrap text-gray-400">&ndash;</td>
-                                            <?php endif; ?>
+                                            <td class="p-4 text-sm whitespace-nowrap text-gray-500">
+                                                <?=$team->marbleRank?>
+                                                <?php if ($team->rankChange > 0) : ?>
+                                                <span class="ml-2 font-medium text-green-600" title="Up <?=$team->rankChange?> since the previous week">&uarr; <?=$team->rankChange?></span>
+                                                <?php elseif ($team->rankChange < 0) : ?>
+                                                <span class="ml-2 font-medium text-red-600" title="Down <?=abs($team->rankChange)?> since the previous week">&darr; <?=abs($team->rankChange)?></span>
+                                                <?php endif; ?>
+                                            </td>
                                             <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->apRank ?? '&ndash;'?></td>
                                             <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900"><?=$team->teamName . $teamFootnote?></td>
                                             <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->marbleCount?></td>
