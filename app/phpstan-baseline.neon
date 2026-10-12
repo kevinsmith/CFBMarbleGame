@@ -1,6 +1,18 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^App\\DataLoader\\ApPollsDataRefresher should not depend on PDO$#'
+			identifier: phpat.testLayerBoundaries5
+			count: 1
+			path: src/DataLoader/ApPollsDataRefresher.php
+
+		-
+			message: '#^App\\DataLoader\\ApPollsDataRefresher should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers0
+			count: 1
+			path: src/DataLoader/ApPollsDataRefresher.php
+
+		-
 			message: '#^App\\DataLoader\\DataRefreshCommand should not depend on PDO$#'
 			identifier: phpat.testLayerBoundaries5
 			count: 1
@@ -179,6 +191,24 @@ parameters:
 			identifier: phpat.testModuleClassesLiveInLayers2
 			count: 1
 			path: src/Rankings/MarbleRankingsQueryHandler.php
+
+		-
+			message: '#^App\\Rankings\\Polls\\ApPollRepository should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Polls/ApPollRepository.php
+
+		-
+			message: '#^App\\Rankings\\Polls\\SqliteApPollRepository should not depend on PDO$#'
+			identifier: phpat.testLayerBoundaries17
+			count: 2
+			path: src/Rankings/Polls/SqliteApPollRepository.php
+
+		-
+			message: '#^App\\Rankings\\Polls\\SqliteApPollRepository should not exist$#'
+			identifier: phpat.testModuleClassesLiveInLayers2
+			count: 1
+			path: src/Rankings/Polls/SqliteApPollRepository.php
 
 		-
 			message: '#^App\\Rankings\\RankedTeam should not exist$#'
