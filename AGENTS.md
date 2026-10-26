@@ -20,7 +20,4 @@ Don't commit automatically. Draft the commit message and wait for my confirmatio
 
 ## Architecture
 
-The modular-monolith rules, review gates, and architecture reference are app-specific and live with the app:
-
-- `app/AGENTS.md` — the enforced architecture rules and review gates
-- `app/docs/architecture/README.md` — the full reference (companions: identity-and-access.md, greenfield.md, migration.md)
+The modular-monolith rules and review gates are app-specific and live with the app in `app/AGENTS.md`.

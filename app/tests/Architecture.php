@@ -56,7 +56,7 @@ final class Architecture
      */
     private static function modules(): array
     {
-        $src  = __DIR__ . '/../src'; // from tests/Architecture.php per docs/architecture/greenfield.md; adjust if moved — relative to this file, not CWD
+        $src  = __DIR__ . '/../src'; // from tests/Architecture.php; adjust if moved — relative to this file, not CWD
         $dirs = array_filter(
             scandir($src) ?: [],
             static fn ($d) => is_dir("$src/$d") && ! in_array($d, ['Kernel', 'Bootstrap', '.', '..'], true),
@@ -70,6 +70,8 @@ final class Architecture
      * Vendor contracts, listed PHP value types, and listed exception bases any layer may use.
      * A new value-type package or PHP value class fails CI until added here — deliberately loud.
      * Globals are deny-by-default: no catch-all for the global namespace.
+     * Value types are used directly: an interface on a value type does not make a library
+     * change easier, because the type is in every signature. Services stay behind interfaces.
      *
      * @return list<SelectorInterface>
      */
@@ -146,7 +148,7 @@ final class Architecture
                     Selector::inNamespace('App\Kernel'),
                     Selector::Not(Selector::inNamespace('App')), // vendor + PHP
                 )
-                ->because('modules depend only on themselves, Kernel, and vendor — see docs/architecture/README.md "Common Violations → Fixes"');
+                ->because('modules depend only on themselves, Kernel, and vendor');
         }
     }
 
@@ -162,7 +164,7 @@ final class Architecture
                 Selector::inNamespace('App\Kernel'),
                 ...self::vendorContractsAndValueTypes(),
             )
-            ->because('Kernel depends on nothing in App, and on vendor only through contracts and value types — see docs/architecture/README.md "What Goes Where"');
+            ->because('Kernel depends on nothing in App, and on vendor only through contracts and value types');
     }
 
     /**
@@ -174,7 +176,7 @@ final class Architecture
             ->classes(Selector::inNamespace('App'))
             ->shouldNot()->dependOn()
             ->classes(Selector::inNamespace('Tests'))
-            ->because('Tests\ is autoload-dev only; a src reference to it fatals in production — see docs/architecture/README.md "Inside a Module: Layers"');
+            ->because('Tests\ is autoload-dev only; a src reference to it fatals in production');
     }
 
     /**
@@ -190,7 +192,7 @@ final class Architecture
             ))
             ->shouldNot()->dependOn()
             ->classes(Selector::inNamespace('App\Bootstrap'))
-            ->because('nothing in App depends on the composition root — see docs/architecture/README.md "What Goes Where"');
+            ->because('nothing in App depends on the composition root');
     }
 
     /**
@@ -205,7 +207,7 @@ final class Architecture
             ))
             ->shouldNot()->dependOn()
             ->classes(Selector::implements(ContainerInterface::class))
-            ->because('constructor injection only; the container is invisible outside Bootstrap — see docs/architecture/README.md "Common Violations → Fixes"');
+            ->because('constructor injection only; the container is invisible outside Bootstrap');
     }
 
     /**
@@ -225,7 +227,7 @@ final class Architecture
                     Selector::Not(Selector::inNamespace("$m\\Infrastructure")),
                 ))
                 ->shouldNot()->exist()
-                ->because('every module class lives in Domain, Application, Presentation, or Infrastructure — see docs/architecture/README.md "Inside a Module: Layers"');
+                ->because('every module class lives in Domain, Application, Presentation, or Infrastructure');
         }
     }
 
@@ -246,25 +248,25 @@ final class Architecture
                 ->classes(Selector::inNamespace("$m\Domain"))
                 ->canOnly()->dependOn()
                 ->classes(Selector::inNamespace("$m\Domain"), ...$shared)
-                ->because('Domain is pure: itself, Kernel, and vendor value types only — see docs/architecture/README.md "Inside a Module: Layers"');
+                ->because('Domain is pure: itself, Kernel, and vendor value types only');
 
             yield PHPat::rule()
                 ->classes(Selector::inNamespace("$m\Application"))
                 ->canOnly()->dependOn()
                 ->classes(Selector::inNamespace("$m\Application"), Selector::inNamespace("$m\Domain"), ...$shared)
-                ->because('Application depends inward on Domain only — see docs/architecture/README.md "Inside a Module: Layers"');
+                ->because('Application depends inward on Domain only');
 
             yield PHPat::rule()
                 ->classes(Selector::inNamespace("$m\Presentation"))
                 ->canOnly()->dependOn()
                 ->classes(Selector::inNamespace("$m\Presentation"), Selector::inNamespace("$m\Application"), Selector::inNamespace("$m\Domain"), ...$shared)
-                ->because('Presentation depends inward on Application and Domain — see docs/architecture/README.md "Inside a Module: Layers"');
+                ->because('Presentation depends inward on Application and Domain');
 
             yield PHPat::rule()
                 ->classes(Selector::inNamespace("$m\Infrastructure"))
                 ->canOnly()->dependOn()
                 ->classes(Selector::inNamespace("$m\Infrastructure"), Selector::inNamespace("$m\Application"), Selector::inNamespace("$m\Domain"), ...$infraShared)
-                ->because('Infrastructure depends inward on Application and Domain — Presentation is a sibling adapter, see docs/architecture/README.md "Inside a Module: Layers"');
+                ->because('Infrastructure depends inward on Application and Domain — Presentation is a sibling adapter');
 
             yield PHPat::rule()
                 ->classes(Selector::AllOf(
@@ -273,7 +275,7 @@ final class Architecture
                 ))
                 ->shouldNot()->dependOn()
                 ->classes(Selector::inNamespace("$m\Infrastructure"))
-                ->because('Infrastructure is invisible inside the module: only container bindings reference it — see docs/architecture/README.md "Inside a Module: Layers"');
+                ->because('Infrastructure is invisible inside the module: only container bindings reference it');
 
             yield PHPat::rule()
                 ->classes(Selector::AllOf(
@@ -282,7 +284,7 @@ final class Architecture
                 ))
                 ->shouldNot()->dependOn()
                 ->classes(Selector::classname(PDO::class), Selector::classname(PDOStatement::class))
-                ->because('PDO lives in Infrastructure repositories only; the connection is constructed in Bootstrap — see docs/architecture/README.md "Inside a Module: Layers"');
+                ->because('PDO lives in Infrastructure repositories only; the connection is constructed in Bootstrap');
         }
     }
 
@@ -298,7 +300,7 @@ final class Architecture
                 Selector::NoneOf(Selector::isInterface(), Selector::isEnum(), Selector::isTrait()),
             ))
             ->should()->beFinal()
-            ->because('Kernel holds contracts and value objects only — see docs/architecture/README.md principle 6');
+            ->because('Kernel holds contracts and value objects only');
     }
 
     /**
@@ -312,6 +314,6 @@ final class Architecture
                 Selector::NoneOf(Selector::isInterface(), Selector::isEnum(), Selector::isTrait()),
             ))
             ->should()->beReadonly()
-            ->because('Kernel holds contracts and value objects only — see docs/architecture/README.md principle 6');
+            ->because('Kernel holds contracts and value objects only');
     }
 }

@@ -4,7 +4,7 @@ Nested rules for the PHP app. The repo root `AGENTS.md` still applies; this file
 
 ## Architecture (modular monolith — enforced)
 
-If this section conflicts with `docs/architecture/README.md` or `tests/Architecture.php`, those win.
+If this section conflicts with `tests/Architecture.php`, that file wins.
 
 Three concepts:
 
@@ -19,7 +19,9 @@ Three concepts:
   construction.
 
 **PHPat (CI):** structural dependency and placement rules live only in `tests/Architecture.php`. Run
-`make phpstan` before committing; a PHPat failure message names the doc section that resolves it.
+`make phpstan` before committing; a PHPat failure message states the rule that was broken.
+Don't add entries to `phpstan-baseline.neon`; fix new violations instead. Don't restructure existing code to conform
+unless that's the task.
 
 **Review gates** (not PHPat — apply in code review):
 
@@ -31,24 +33,6 @@ Three concepts:
   inject Kernel contracts instead.
 - Right layer for the class (PHPat enforces the namespace exists under a layer, not that the class belongs there
   conceptually). Behavior enforcing an entity's invariants belongs on the entity (avoid anemic Domain).
-
-## Full reference: docs/architecture/README.md
-
-Read the relevant section before acting when the task involves:
-
-- Moving code across namespaces, restructuring, or carving modules → docs/architecture/migration.md + "Drawing Module
-  Boundaries". Migration is ratchet-driven: full conformance is the eventual goal, but conformance work is always its
-  own dedicated task — never restructure legacy code as a side effect of another change. Baselined violations are
-  backlog, not blockers.
-- Reviewing a PR → "Code Review Checklist" + "Common Violations → Fixes"
-- Adding anything to Kernel, creating a shared service, or adding a vendor dependency → Guiding Principles 6–8
-- Placing classes within a module (which layer, where PDO/DTOs/validation go, CLI commands, read paths, transactions,
-  outcomes/error handling, event dispatch, testing) → "Inside a Module: Layers"
-- Events, cross-module reporting, or transactions → "Failure Modes & Mitigations" (contains two binding decisions:
-  reporting is read-only-fenced; events are synchronous and transactional by default)
-- Starting a new repo or greenfield work → docs/architecture/greenfield.md + Guiding Principle 9
-- Anything touching users, identity, authentication, sessions, or permissions →
-  docs/architecture/identity-and-access.md (design deep-dive; same rules, more reasoning)
 
 ## Unit vs integration tests
 
