@@ -167,6 +167,23 @@ final class GamesDataRefresherTest extends TestCase
         );
     }
 
+    public function testAGameInProgressLeavesTheWinnerUnset(): void
+    {
+        $this->makeRefresher([
+            self::cfbdGame([
+                'id' => 401000001,
+                'completed' => false,
+                'homePoints' => 14,
+                'awayPoints' => 7,
+            ]),
+        ])->pullAndStoreFreshData(2025);
+
+        self::assertSame(
+            [['cfbd_id' => 401000001, 'winner' => null]],
+            $this->fetchAll('SELECT cfbd_id, winner FROM games'),
+        );
+    }
+
     public function testANeutralSiteGameIsStoredAsNeutral(): void
     {
         $this->makeRefresher([
@@ -276,6 +293,7 @@ final class GamesDataRefresherTest extends TestCase
             'id' => 401000001,
             'startDate' => '2025-09-06T19:00:00.000Z',
             'week' => 1,
+            'completed' => true,
             'neutralSite' => false,
             'homeId' => 251,
             'homeTeam' => 'Texas',

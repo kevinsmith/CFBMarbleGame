@@ -192,6 +192,7 @@ final class DataRefreshCommandTest extends TestCase
             'id' => 401000001,
             'startDate' => '2025-09-06T19:00:00.000Z',
             'week' => 1,
+            'completed' => true,
             'neutralSite' => false,
             'homeId' => 251,
             'homeTeam' => 'Texas',

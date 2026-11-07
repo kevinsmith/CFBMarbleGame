@@ -67,6 +67,7 @@ use const JSON_THROW_ON_ERROR;
  *     date: DateTimeImmutable,
  *     week_number: int,
  *     neutral_site: int,
+ *     completed: bool,
  *     home_team_cfbd_id: int,
  *     away_team_cfbd_id: int,
  *     home_team_points: ?int,
@@ -143,6 +144,7 @@ final readonly class GamesDataRefresher
                 'date' => $gameDate,
                 'week_number' => (int) $game['week'],
                 'neutral_site' => (int) $game['neutralSite'],
+                'completed' => $game['completed'],
                 'home_team_cfbd_id' => (int) $game['homeId'],
                 'away_team_cfbd_id' => (int) $game['awayId'],
                 'home_team_points' => $game['homePoints'],
@@ -295,7 +297,7 @@ final readonly class GamesDataRefresher
     /** @param GameArray $game */
     private function determineWinner(array $game): Winner|null
     {
-        if ($game['home_team_points'] === null || $game['away_team_points'] === null) {
+        if (! $game['completed'] || $game['home_team_points'] === null || $game['away_team_points'] === null) {
             return null;
         }
 
