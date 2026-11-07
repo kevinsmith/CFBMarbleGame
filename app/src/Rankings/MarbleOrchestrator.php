@@ -9,6 +9,7 @@ use App\Rankings\Games\Winner;
 use App\Rankings\Teams\Conference;
 use App\Rankings\Teams\Subdivision;
 use App\Rankings\Teams\Team;
+use LogicException;
 use Psr\Log\LoggerInterface;
 
 use function array_filter;
@@ -34,6 +35,11 @@ final readonly class MarbleOrchestrator
     public function getRankedTeams(int $week, array $teams, array $games): array
     {
         foreach ($teams as $team) {
+            // The team repository can give the same Team objects again. Counts from an earlier pass would be doubled.
+            if ($team->getMarbles() !== 0 || $team->getWins() !== 0 || $team->getLosses() !== 0) {
+                throw new LogicException('Team ' . $team->teamName . ' has counts from an earlier pass. Rank each set of teams one time only.');
+            }
+
             $this->doleOutInitialMarbles($team, $games);
         }
 

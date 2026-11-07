@@ -12,6 +12,7 @@ use App\Rankings\Teams\Conference;
 use App\Rankings\Teams\Subdivision;
 use App\Rankings\Teams\Team;
 use App\Rankings\Teams\TeamId;
+use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -321,6 +322,21 @@ final class MarbleOrchestratorTest extends TestCase
                 array_map(static fn (Team $team): string => $team->getWins() . '-' . $team->getLosses(), [$texas, $oklahoma, $southDakotaState]),
             ),
         );
+    }
+
+    public function testRankingTheSameTeamsASecondTimeThrows(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+        $games = [TeamGameFactory::game(10, 1, $texas, $oklahoma, Winner::Home)];
+        $orchestrator = $this->makeOrchestrator();
+
+        $orchestrator->getRankedTeams(2, [$texas, $oklahoma], $games);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Team Texas has counts from an earlier pass.');
+
+        $orchestrator->getRankedTeams(2, [$texas, $oklahoma], $games);
     }
 
     public function testPreviousRanksAwardTheMarblesForEachGameOnlyOnce(): void
