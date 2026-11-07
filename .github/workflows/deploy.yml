@@ -191,6 +191,10 @@ jobs:
     environment:
       name: production
       url: https://cfbmarblegame.com
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
     concurrency:
       group: production
       cancel-in-progress: false
@@ -216,9 +220,17 @@ jobs:
         with:
           variable_name: GIT_SHORT_SHA
 
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:ci
+          ping: ${{ secrets.SSH_HOST }}
+
       - name: Deploy to production
         env:
-          DOCKER_HOST: ssh://deploy@167.99.8.133
+          DOCKER_HOST: ssh://deploy@${{ secrets.SSH_HOST }}
           HEALTH_CHECK_URL: ${{ vars.HEALTH_CHECK_URL }}
           MAX_RETRIES: 30
           RETRY_INTERVAL: 10
