@@ -58,12 +58,9 @@ final class HomeTest extends TestCase
 {
     private PDO $pdo;
 
-    private Home $home;
-
     protected function setUp(): void
     {
         $this->pdo = SqliteTestDatabase::pdo();
-        $this->home = $this->makeHome();
     }
 
     public function testDefaultPageReturnsRankingsHtml(): void
@@ -71,7 +68,7 @@ final class HomeTest extends TestCase
         $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
         $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
 
-        $html = $this->html(($this->home)($this->request()));
+        $html = $this->html(($this->makeHome())($this->request()));
 
         $year = date('Y');
         self::assertStringContainsString('Preseason', $html);
@@ -85,7 +82,7 @@ final class HomeTest extends TestCase
         $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
         $this->insertGame(10, 1, 1, 2, 'home');
 
-        $html = $this->html(($this->home)($this->request()));
+        $html = $this->html(($this->makeHome())($this->request()));
 
         self::assertStringContainsString('<meta name="color-scheme" content="light">', $html);
         self::assertStringContainsString('<body class="bg-white">', $html);
@@ -98,7 +95,7 @@ final class HomeTest extends TestCase
         $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
         $this->insertGame(10, 1, 1, 2, 'home');
 
-        $html = $this->html(($this->home)($this->request(['week' => '1'])));
+        $html = $this->html(($this->makeHome())($this->request(['week' => '1'])));
 
         self::assertStringContainsString('value="/?season=2025&week=1" selected', $html);
         self::assertStringContainsString('value="/?season=2025&week=2"', $html);
@@ -107,7 +104,7 @@ final class HomeTest extends TestCase
 
     public function testNonNumericWeekReturns404(): void
     {
-        $response = ($this->home)($this->request(['week' => 'abc']));
+        $response = ($this->makeHome())($this->request(['week' => 'abc']));
 
         self::assertSame(404, $response->getCode());
     }
@@ -117,7 +114,7 @@ final class HomeTest extends TestCase
         $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
         $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
 
-        $response = ($this->home)($this->request(['week' => '3']));
+        $response = ($this->makeHome())($this->request(['week' => '3']));
 
         self::assertSame(404, $response->getCode());
     }
@@ -127,7 +124,7 @@ final class HomeTest extends TestCase
         $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
         $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
 
-        $html = $this->html(($this->home)($this->request(['week' => '0'])));
+        $html = $this->html(($this->makeHome())($this->request(['week' => '0'])));
 
         self::assertStringContainsString('value="/?season=' . date('Y') . '&week=1" selected', $html);
     }
@@ -141,7 +138,7 @@ final class HomeTest extends TestCase
             $this->insertGame(10 + $week, $week, 1, 2, 'home');
         }
 
-        $html = $this->html(($this->home)($this->request()));
+        $html = $this->html(($this->makeHome())($this->request()));
 
         self::assertStringContainsString('>Final</option>', $html);
     }
@@ -152,7 +149,7 @@ final class HomeTest extends TestCase
         $this->insertTeam(2, 'South Dakota State', 'FCS', 'MVFC');
         $this->insertGame(10, 1, 2, 1, 'home');
 
-        $html = $this->html(($this->home)($this->request()));
+        $html = $this->html(($this->makeHome())($this->request()));
 
         self::assertStringContainsString('South Dakota State*', $html);
     }
@@ -165,14 +162,14 @@ final class HomeTest extends TestCase
         $this->insertGame(10, 1, 1, 3, 'home');
         $this->insertGame(11, 2, 2, 1, 'home');
 
-        $html = $this->html(($this->home)($this->request(['week' => '3'])));
+        $html = $this->html(($this->makeHome())($this->request(['week' => '3'])));
 
         self::assertStringNotContainsString('>Trend</th>', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>\s*1\s*<span[^>]*text-green-600[^>]*title="Up 1 since the previous week">&uarr; 1<\/span>\s*<\/td>/', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>\s*2\s*<span[^>]*text-red-600[^>]*title="Down 1 since the previous week">&darr; 1<\/span>\s*<\/td>/', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>\s*3\s*<\/td>\s*<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Baylor<\/td>/', $html);
 
-        $preseason = $this->html(($this->home)($this->request(['week' => '1'])));
+        $preseason = $this->html(($this->makeHome())($this->request(['week' => '1'])));
         self::assertStringNotContainsString('&uarr;', $preseason);
         self::assertStringNotContainsString('&darr;', $preseason);
         self::assertMatchesRegularExpression('/<td[^>]*>\s*1\s*<\/td>/', $preseason);
@@ -192,16 +189,16 @@ final class HomeTest extends TestCase
             (2026, 2, 251, 19);
         SQL);
 
-        $html = $this->html(($this->home)($this->request(['season' => '2025', 'week' => '2'])));
+        $html = $this->html(($this->makeHome())($this->request(['season' => '2025', 'week' => '2'])));
 
         self::assertMatchesRegularExpression('/>Marble Rank<\/th>\s*<th[^>]*>AP Poll<\/th>\s*<th[^>]*>Team<\/th>/', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>7<\/td>\s*<td[^>]*>Texas<\/td>/', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma<\/td>/', $html);
 
-        $preseason = $this->html(($this->home)($this->request(['season' => '2025', 'week' => '1'])));
+        $preseason = $this->html(($this->makeHome())($this->request(['season' => '2025', 'week' => '1'])));
         self::assertMatchesRegularExpression('/<td[^>]*>1<\/td>\s*<td[^>]*>Texas<\/td>/', $preseason);
 
-        $unpublished = $this->html(($this->home)($this->request(['season' => '2025', 'week' => '3'])));
+        $unpublished = $this->html(($this->makeHome())($this->request(['season' => '2025', 'week' => '3'])));
         self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Texas<\/td>/', $unpublished);
     }
 
@@ -241,7 +238,7 @@ final class HomeTest extends TestCase
         $request = $this->request(['season' => '2025', 'week' => '2']);
 
         $refresher->pullAndStoreFreshData(2025);
-        $unpublished = $this->html(($this->home)($request));
+        $unpublished = $this->html(($this->makeHome())($request));
         self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Texas<\/td>\s*<td[^>]*>132<\/td>/', $unpublished);
         self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma<\/td>\s*<td[^>]*>88<\/td>/', $unpublished);
 
@@ -253,7 +250,7 @@ final class HomeTest extends TestCase
 
     public function testNonNumericSeasonReturns404(): void
     {
-        $response = ($this->home)($this->request(['season' => 'abc']));
+        $response = ($this->makeHome())($this->request(['season' => 'abc']));
 
         self::assertSame(404, $response->getCode());
     }
@@ -264,7 +261,7 @@ final class HomeTest extends TestCase
         $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
         $this->insertGame(10, 1, 1, 2, 'home');
 
-        $response = ($this->home)($this->request(['season' => '2026']));
+        $response = ($this->makeHome())($this->request(['season' => '2026']));
 
         self::assertSame(404, $response->getCode());
     }
