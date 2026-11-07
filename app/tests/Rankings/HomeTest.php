@@ -154,6 +154,54 @@ final class HomeTest extends TestCase
         self::assertStringContainsString('South Dakota State*', $html);
     }
 
+    public function testFcsRecordsAreLabeledAsAgainstFbsTeams(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
+        $this->insertTeam(2, 'South Dakota State', 'FCS', 'MVFC');
+        $this->insertGame(10, 1, 2, 1, 'home');
+
+        $html = $this->html(($this->makeHome())($this->request(['week' => '2'])));
+
+        self::assertMatchesRegularExpression('/South Dakota State\* <span class="ml-1 text-xs font-normal text-gray-500">1-0 vs FBS<\/span><\/td>/', $html);
+        self::assertMatchesRegularExpression('/Texas <span class="ml-1 text-xs font-normal text-gray-500">0-1<\/span><\/td>/', $html);
+    }
+
+    public function testRecordsCountOnlyGamesBeforeTheSelectedWeek(): void
+    {
+        $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
+        $this->insertTeam(2, 'Oklahoma', 'FBS', 'Big 12');
+        $this->insertTeam(3, 'Baylor', 'FBS', 'Big 12');
+        $this->insertGame(10, 1, 1, 2, 'home');
+        $this->insertGame(11, 2, 3, 1, 'away');
+        $this->insertGame(12, 3, 2, 3, 'home');
+
+        $records = [
+            2 => ['Texas' => '1-0', 'Oklahoma' => '0-1', 'Baylor' => '0-0'],
+            3 => ['Texas' => '2-0', 'Oklahoma' => '0-1', 'Baylor' => '0-1'],
+            4 => ['Texas' => '2-0', 'Oklahoma' => '1-1', 'Baylor' => '0-2'],
+        ];
+
+        foreach ($records as $week => $expected) {
+            $html = $this->html(($this->makeHome())($this->request(['week' => (string) $week])));
+
+            foreach ($expected as $team => $record) {
+                self::assertStringContainsString(
+                    '>' . $team . ' <span class="ml-1 text-xs font-normal text-gray-500">' . $record . '</span></td>',
+                    $html,
+                    'Week ' . $week . ', ' . $team,
+                );
+            }
+        }
+
+        $preseason = $this->html(($this->makeHome())($this->request(['week' => '1'])));
+
+        foreach (['Texas', 'Oklahoma', 'Baylor'] as $team) {
+            self::assertStringContainsString('>' . $team . '</td>', $preseason);
+        }
+
+        self::assertStringNotContainsString('text-xs font-normal', $preseason);
+    }
+
     public function testRankChangesAreShownWithArrowsAndColors(): void
     {
         $this->insertTeam(1, 'Texas', 'FBS', 'SEC');
@@ -167,7 +215,7 @@ final class HomeTest extends TestCase
         self::assertStringNotContainsString('>Trend</th>', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>\s*1\s*<span[^>]*text-green-600[^>]*title="Up 1 since the previous week">&uarr; 1<\/span>\s*<\/td>/', $html);
         self::assertMatchesRegularExpression('/<td[^>]*>\s*2\s*<span[^>]*text-red-600[^>]*title="Down 1 since the previous week">&darr; 1<\/span>\s*<\/td>/', $html);
-        self::assertMatchesRegularExpression('/<td[^>]*>\s*3\s*<\/td>\s*<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Baylor<\/td>/', $html);
+        self::assertMatchesRegularExpression('/<td[^>]*>\s*3\s*<\/td>\s*<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Baylor <span class="ml-1 text-xs font-normal text-gray-500">0-1<\/span><\/td>/', $html);
 
         $preseason = $this->html(($this->makeHome())($this->request(['week' => '1'])));
         self::assertStringNotContainsString('&uarr;', $preseason);
@@ -192,14 +240,14 @@ final class HomeTest extends TestCase
         $html = $this->html(($this->makeHome())($this->request(['season' => '2025', 'week' => '2'])));
 
         self::assertMatchesRegularExpression('/>Marble Rank<\/th>\s*<th[^>]*>AP Poll<\/th>\s*<th[^>]*>Team<\/th>/', $html);
-        self::assertMatchesRegularExpression('/<td[^>]*>7<\/td>\s*<td[^>]*>Texas<\/td>/', $html);
-        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma<\/td>/', $html);
+        self::assertMatchesRegularExpression('/<td[^>]*>7<\/td>\s*<td[^>]*>Texas <span class="ml-1 text-xs font-normal text-gray-500">1-0<\/span><\/td>/', $html);
+        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma <span class="ml-1 text-xs font-normal text-gray-500">0-1<\/span><\/td>/', $html);
 
         $preseason = $this->html(($this->makeHome())($this->request(['season' => '2025', 'week' => '1'])));
         self::assertMatchesRegularExpression('/<td[^>]*>1<\/td>\s*<td[^>]*>Texas<\/td>/', $preseason);
 
         $unpublished = $this->html(($this->makeHome())($this->request(['season' => '2025', 'week' => '3'])));
-        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Texas<\/td>/', $unpublished);
+        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Texas <span class="ml-1 text-xs font-normal text-gray-500">1-1<\/span><\/td>/', $unpublished);
     }
 
     public function testUnpublishedApPollAppearsAfterTheNextRefresh(): void
@@ -239,13 +287,13 @@ final class HomeTest extends TestCase
 
         $refresher->pullAndStoreFreshData(2025);
         $unpublished = $this->html(($this->makeHome())($request));
-        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Texas<\/td>\s*<td[^>]*>132<\/td>/', $unpublished);
-        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma<\/td>\s*<td[^>]*>88<\/td>/', $unpublished);
+        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Texas <span class="ml-1 text-xs font-normal text-gray-500">1-0<\/span><\/td>\s*<td[^>]*>132<\/td>/', $unpublished);
+        self::assertMatchesRegularExpression('/<td[^>]*>&ndash;<\/td>\s*<td[^>]*>Oklahoma <span class="ml-1 text-xs font-normal text-gray-500">0-1<\/span><\/td>\s*<td[^>]*>88<\/td>/', $unpublished);
 
         $refresher->pullAndStoreFreshData(2025);
         $published = $this->html(($this->makeHome())($request));
-        self::assertMatchesRegularExpression('/<td[^>]*>7<\/td>\s*<td[^>]*>Texas<\/td>\s*<td[^>]*>132<\/td>/', $published);
-        self::assertMatchesRegularExpression('/<td[^>]*>15<\/td>\s*<td[^>]*>Oklahoma<\/td>\s*<td[^>]*>88<\/td>/', $published);
+        self::assertMatchesRegularExpression('/<td[^>]*>7<\/td>\s*<td[^>]*>Texas <span class="ml-1 text-xs font-normal text-gray-500">1-0<\/span><\/td>\s*<td[^>]*>132<\/td>/', $published);
+        self::assertMatchesRegularExpression('/<td[^>]*>15<\/td>\s*<td[^>]*>Oklahoma <span class="ml-1 text-xs font-normal text-gray-500">0-1<\/span><\/td>\s*<td[^>]*>88<\/td>/', $published);
     }
 
     public function testNonNumericSeasonReturns404(): void

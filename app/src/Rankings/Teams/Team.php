@@ -10,6 +10,10 @@ final class Team
 {
     private int $marbles = 0;
 
+    private int $wins = 0;
+
+    private int $losses = 0;
+
     private int $marbleRank;
 
     public function __construct(
@@ -41,6 +45,26 @@ final class Team
     public function getMarbles(): int
     {
         return $this->marbles;
+    }
+
+    public function recordWin(): void
+    {
+        $this->wins++;
+    }
+
+    public function recordLoss(): void
+    {
+        $this->losses++;
+    }
+
+    public function getWins(): int
+    {
+        return $this->wins;
+    }
+
+    public function getLosses(): int
+    {
+        return $this->losses;
     }
 
     public function setMarbleRank(int $rank): void

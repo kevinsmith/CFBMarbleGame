@@ -20,6 +20,7 @@ use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 use Stringable;
 
+use function array_combine;
 use function array_map;
 use function array_values;
 
@@ -297,6 +298,29 @@ final class MarbleOrchestratorTest extends TestCase
 
         self::assertSame(['Oklahoma' => 110, 'Texas' => 110], self::marbleCountsByName($rankedTeams));
         self::assertSame([], $previousRanks);
+    }
+
+    public function testRecordsCountEachGameBeforeTheWeekOnceIncludingWinsOverFcsTeams(): void
+    {
+        $texas = TeamGameFactory::team(1, 'Texas', conference: Conference::SEC);
+        $oklahoma = TeamGameFactory::team(2, 'Oklahoma', conference: Conference::Big12);
+        $southDakotaState = TeamGameFactory::team(3, 'South Dakota State', subdivision: Subdivision::FCS);
+
+        $games = [
+            TeamGameFactory::game(10, 1, $texas, $southDakotaState, Winner::Home),
+            TeamGameFactory::game(11, 2, $oklahoma, $texas, Winner::Home),
+            TeamGameFactory::game(12, 3, $texas, $oklahoma, Winner::Home),
+        ];
+
+        $this->makeOrchestrator()->getRankedTeamsWithPreviousRanks(3, [$texas, $oklahoma, $southDakotaState], $games);
+
+        self::assertSame(
+            ['Texas' => '1-1', 'Oklahoma' => '1-0', 'South Dakota State' => '0-1'],
+            array_combine(
+                ['Texas', 'Oklahoma', 'South Dakota State'],
+                array_map(static fn (Team $team): string => $team->getWins() . '-' . $team->getLosses(), [$texas, $oklahoma, $southDakotaState]),
+            ),
+        );
     }
 
     public function testPreviousRanksAwardTheMarblesForEachGameOnlyOnce(): void

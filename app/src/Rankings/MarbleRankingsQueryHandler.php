@@ -61,6 +61,8 @@ final readonly class MarbleRankingsQueryHandler
                     $team->getMarbles(),
                     $team->getMarbleRank(),
                     $team->subdivision === Subdivision::FCS,
+                    $team->getWins(),
+                    $team->getLosses(),
                     $previousRank === null ? null : $previousRank - $team->getMarbleRank(),
                     $apRanks[$team->id->id] ?? null,
                 );

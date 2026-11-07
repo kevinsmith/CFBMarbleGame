@@ -241,6 +241,10 @@ final readonly class MarbleOrchestrator
         $winner = $game->winningTeam();
         $loser = $game->losingTeam();
 
+        // Record the result before the FCS check below. A win against an FCS team moves no marbles, but it is a win.
+        $winner->recordWin();
+        $loser->recordLoss();
+
         $loggerContext['winner'] = [
             'id' => $winner->id->id,
             'team' => $winner->teamName,

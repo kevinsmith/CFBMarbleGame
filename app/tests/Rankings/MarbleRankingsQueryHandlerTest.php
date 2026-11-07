@@ -126,9 +126,9 @@ final class MarbleRankingsQueryHandlerTest extends TestCase
 
         self::assertEquals(
             [
-                new RankedTeam('Oklahoma', 'Big 12', 100, 1, false, 0),
-                new RankedTeam('Texas', 'SEC', 75, 2, false, -1),
-                new RankedTeam('South Dakota State', 'MVFC', 25, 3, true, null),
+                new RankedTeam('Oklahoma', 'Big 12', 100, 1, false, 0, 0, 0),
+                new RankedTeam('Texas', 'SEC', 75, 2, false, 0, 1, -1),
+                new RankedTeam('South Dakota State', 'MVFC', 25, 3, true, 1, 0, null),
             ],
             $rankedTeams,
         );

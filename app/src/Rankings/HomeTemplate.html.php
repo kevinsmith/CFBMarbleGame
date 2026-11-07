@@ -97,7 +97,7 @@ use App\Rankings\RankedTeam;
                                                 <?php endif; ?>
                                             </td>
                                             <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->apRank ?? '&ndash;'?></td>
-                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900"><?=$team->teamName . $teamFootnote?></td>
+                                            <td class="p-4 text-sm font-medium whitespace-nowrap text-gray-900"><?=$team->teamName . $teamFootnote?><?php if ($week > 1) : ?> <span class="ml-1 text-xs font-normal text-gray-500"><?=$team->wins?>-<?=$team->losses?><?=$team->isFCS ? ' vs FBS' : ''?></span><?php endif; ?></td>
                                             <td class="p-4 text-sm whitespace-nowrap text-gray-500"><?=$team->marbleCount?></td>
                                             <td class="py-4 pr-4 pl-4 text-sm whitespace-nowrap text-gray-500 sm:pr-0"><?=$team->conference?></td>
                                         </tr>
