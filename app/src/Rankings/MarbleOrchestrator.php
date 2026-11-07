@@ -238,8 +238,8 @@ final readonly class MarbleOrchestrator
             ],
         ];
 
-        $winner = $this->getWinner($game);
-        $loser = $this->getLoser($game);
+        $winner = $game->winningTeam();
+        $loser = $game->losingTeam();
 
         $loggerContext['winner'] = [
             'id' => $winner->id->id,
@@ -282,7 +282,7 @@ final readonly class MarbleOrchestrator
 
     private function determineWinPercentage(Game $game): float
     {
-        if ($this->getWinner($game)->subdivision === Subdivision::FCS) {
+        if ($game->winningTeam()->subdivision === Subdivision::FCS) {
             return 0.25;
         }
 
@@ -295,24 +295,6 @@ final readonly class MarbleOrchestrator
         }
 
         return 0.2;
-    }
-
-    private function getWinner(Game $game): Team
-    {
-        if ($game->winner === Winner::Home) {
-            return $game->homeTeam;
-        }
-
-        return $game->awayTeam;
-    }
-
-    private function getLoser(Game $game): Team
-    {
-        if ($game->winner === Winner::Home) {
-            return $game->awayTeam;
-        }
-
-        return $game->homeTeam;
     }
 
     /**
