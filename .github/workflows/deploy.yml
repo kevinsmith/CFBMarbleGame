@@ -223,9 +223,23 @@ jobs:
           MAX_RETRIES: 30
           RETRY_INTERVAL: 10
         run: |
+          WEB_IMAGE="${REGISTRY}/${APP_IMAGE}:${GIT_SHORT_SHA}"
+
+          # The web service updates start-first, so the old container keeps
+          # answering while the new one boots. Trust the health check only
+          # once every running web container is the new image.
+          function only_new_release_running {
+            local tasks
+            tasks=$(docker service ps cfbmarblegame_web --format '{{.Image}} {{.CurrentState}}') || return 1
+            awk -v image="$WEB_IMAGE" '
+              $2 == "Running" { running++; if ($1 != image) old++ }
+              END { exit !(running && !old) }
+            ' <<< "$tasks"
+          }
+
           function check_health {
-            curl --silent --fail --max-time 5 "$HEALTH_CHECK_URL" > /dev/null
-            return $?
+            only_new_release_running &&
+              curl --silent --fail --max-time 5 "$HEALTH_CHECK_URL" > /dev/null
           }
 
           echo "Deploying stack..."
